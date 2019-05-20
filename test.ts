@@ -1,4 +1,6 @@
-// Enumerations
+/**
+ * Enumerations
+ */
 // Standard palette
 enum Color {
     Transparent, // 0
@@ -19,15 +21,21 @@ enum Color {
     Black // 15 = RGB(0, 0, 0)
 }   // enum Color
 
-// Global variables
+/**
+ * Global constants
+ */
+const FIRST_OPTION_SCREEN: number = 5
+
+/**
+ * Global variables
+ */
 let splashes: infoScreens.RotatingScreens[] = []
 let currSplash: number = -1
 let newSplash: infoScreens.SplashScreens = null
 
-// Global constants
-const FIRST_OPTION_SCREEN: number = 5
-
-// Main (a.k.a. game.onStart())
+/**
+ * Main (a.k.a. game.onStart())
+ */
 
 // Template splash screen
 splashes.push(new infoScreens.SplashScreens(
@@ -360,7 +368,9 @@ splashes.push(osColl)
 
 nextSplash()
 
-// Game loops
+/**
+ * Game loops
+ */
 game.onUpdate(function () {
     if (game.runtime() >= splashes[currSplash].nextTime) {
         splashes[currSplash].rotate()
@@ -392,7 +402,9 @@ game.onUpdate(function () {
     }   // switch (currSplash)
 })  // game.onUpdate()
 
-// Controller event handlers
+/**
+ * Controller event handlers
+ */
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currSplash < FIRST_OPTION_SCREEN) {
         nextSplash()
@@ -464,7 +476,9 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     }   // if (currSplash < FIRST_OPTION_SCREEN)
 })  // controller.up()
 
-// Other functions
+/**
+ * Other functions
+ */
 function nextSplash(): void {
     currSplash++
     if (currSplash >= splashes.length) {

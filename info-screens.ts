@@ -1,3 +1,8 @@
+/**
+ * Extension for creating information screens (like splash screens and options screens).
+ */
+//% weight=0 color=#b8860b icon="\uf085" block="Info Screens"
+//% advanced=true
 namespace infoScreens {
     /**
      * Enumerations
@@ -8,24 +13,40 @@ namespace infoScreens {
         Next
     }   // enum FooterLocation
 
+    /**
+     * Used to indicate if images for moving sprites are "pointing" in a particular direction.
+     * Images will be flipped so that they appear to be moving in the correct direction.
+     */
     export enum SpriteDirection {
         Both,
         PointsLeft,
         PointsRight
     }   // enum SpriteDirection
 
+    /**
+     * Indicates how moving sprites should be placed and animated on the screen.
+     */
     export enum SpriteMode {
-        // Sprites move horizontally, one at a time, within space between headlines and mid-screen text
+        /**
+         * Sprites move horizontally, one at a time, within space between headlines and mid-screen text.
+         */
         BlankSpace,
 
-        // Sprites are all placed on screen and move in random directions, bouncing off of walls
+        /**
+         * Sprites are all placed on screen and move in random directions, bouncing off of walls.
+         */
         Random,
 
-        // Sprites are all placed on screen and move in random directions,
-        // game.onUpdate() will handle off-screen sprites
+        /**
+         * Sprites are all placed on screen and move in random directions;
+         * game.onUpdate() will handle off-screen sprites.
+         */
         RandomWillUpdate
     }   // enum SpriteMode
 
+    /**
+     * Sprite types used when extension creates sprites.
+     */
     export enum SpriteType {
         Cursor = 77,
         Moving = 19,
@@ -61,76 +82,111 @@ namespace infoScreens {
      * Interfaces
      */
     interface CursorOptions {
-        // Sprite for cursor
+        /**
+         * Sprite for cursor
+         */
         sprite?: Sprite
 
-        // Main image for cursor
+        /**
+         * Main image for cursor
+         */
         img?: Image
 
-        // Image for cursor when in footer
+        /**
+         * Image for cursor when in footer
+         */
         footerImg?: Image
 
-        // Color of cursor
+        /**
+         * Color of cursor
+         */
         color: number
 
-        // Current option group where cursor is located
+        /**
+         * Current option group where cursor is located
+         */
         currGroup: number
 
-        // Current option where cursor is located
+        /**
+         * Current option where cursor is located
+         */
         currOption: number
     }   // interface Cursor
 
     interface MovingSpriteOptions {
-        // Sprite images
+        /**
+         * Sprite images
+         */
         imgs: Image[]
 
-        // Direction(s) that sprites "point"
+        /**
+         * Direction(s) that sprites "point"
+         */
         dir: SpriteDirection
 
-        // Mode to use when displaying sprites
+        /**
+         * Mode to use when displaying sprites
+         */
         mode: SpriteMode
 
-        // Speed to use for moving sprites
+        /**
+         * Speed to use for moving sprites
+         */
         speed: number
 
-        // Vertical coordinate for static sprites
+        /**
+         * Vertical coordinate for static sprites
+         */
         y: number
     }   // interface MovingSpriteOptions
 
     interface StaticSpriteOptions {
-        // Sprite image
+        /**
+         * Sprite image
+         */
         img: Image
 
-        // Horizontal coordinate for sprite
+        /**
+         * Horizontal coordinate for sprite
+         */
         x: number
 
-        // Vertical coordinate for sprite
+        /**
+         * Vertical coordinate for sprite
+         */
         y: number
     }   // interface StaticSpriteOptions
 
+    /**
+     * Common fields for printing strings.
+     * Subclasses should implement a <code>data</code> field with the data to print.
+     */
     interface PrintOptions {
-        // Color to use when printing data
+        /**
+         * Color to use when printing data
+         */
         color: number
 
-        // Font to use when printing data
+        /**
+         * Font to use when printing data
+         */
         font: image.Font
 
-        // Vertical coordinate to use when printing data
+        /**
+         * Vertical coordinate to use when printing data
+         */
         y: number
     }   // interface PrintOptions
 
     interface StringPrintOptions extends PrintOptions {
-        // Data to print
         data: string
     }   // interface StringPrintOptions
 
     interface StringArrayPrintOptions extends PrintOptions {
-        // Data to print
         data: string[]
     }   // interface StringArrayPrintOptions
 
     interface String2dArrayPrintOptions extends PrintOptions {
-        // Data to print
         data: string[][]
     }   // interface String2dArrayPrintOptions
 
@@ -152,12 +208,22 @@ namespace infoScreens {
         protected _midText: String2dArrayPrintOptions;
         protected _titles: StringArrayPrintOptions;
         protected _movingSprites: MovingSpriteOptions;
-        protected _interval: number // interval in milliseconds for splash screens to rotate
+        protected _interval: number // interval in milliseconds for screens to rotate
         protected _next: number // next scheduled time to rotate screens
         protected _staticSprites: StaticSpriteOptions[] // container for static sprites
 
         /**
          * Constructor
+         * @param {string[]} titles - Array of strings to display as the title
+         * @param {number} titlesColor - Color to use when printing titles
+         * @param {string[][]} headlines - Sets of strings to display as headlines
+         * @param {number} headlinesColor - Color to use when printing headlines
+         * @param {string} footer - Text to print at the bottom of the screen
+         * @param {number} footerColor - Color to use when printing footer
+         * @param {string[][]} midText - Sets of strings (up to three sets) to display in the center of the screen
+         * @param {number} midTextColor - Color to use when printing the mid-text
+         * @param {number} backColor - Color to use for the background
+         * @param {number} delay - Interval in milliseconds when screens will rotate
          */
         constructor(titles: string[], titlesColor?: number,
             headlines?: string[][], headlinesColor?: number,
@@ -212,34 +278,30 @@ namespace infoScreens {
         /**
          * Getters and setters
          */
+        /**
+         * @return {Image} Image used as header or background image
+         */
         public get backImage(): Image {
             return this._backImage
         }   // get backImage()
 
+        /**
+         * @param {Image} value - Image to use as header or background image
+         */
         public set backImage(value: Image) {
             this._backImage = value
         }   // set backImage()
 
-        public get footer(): StringPrintOptions {
-            return this._footer;
-        }   // get footer()
-
-        public get titles(): StringArrayPrintOptions {
-            return this._titles;
-        }   // get titles()
-
-        public get midText(): String2dArrayPrintOptions {
-            return this._midText;
-        }   // get midText()
-
-        public get headlines(): String2dArrayPrintOptions {
-            return this._headlines;
-        }   // get headlines()
-
+        /**
+         * @return {number} Interval in milliseconds when screens will rotate
+         */
         public get delay(): number {
             return this._interval
         }   // get delay()
 
+        /**
+         * @param {number} Interval in milliseconds when screens will rotate
+         */
         public set delay(value: number) {
             if (value >= 0) {
                 this._interval = value
@@ -248,27 +310,48 @@ namespace infoScreens {
             }   // if (value)
         }   // set delay()
 
-        public get nextTime(): number {
-            return this._next
-        }   // get nextTime()
+        public get footer(): StringPrintOptions {
+            return this._footer;
+        }   // get footer()
+
+        public get headlines(): String2dArrayPrintOptions {
+            return this._headlines;
+        }   // get headlines()
+
+        public get midText(): String2dArrayPrintOptions {
+            return this._midText;
+        }   // get midText()
 
         public get movingSpriteOptions(): MovingSpriteOptions {
             return this._movingSprites;
         }   // get movingSpriteOptions()
 
         /**
+         * @return {number} Next <code>game.runtime()</code> when screens should be rotated;
+         *                  call @see #rotate to do so
+         */
+        public get nextTime(): number {
+            return this._next
+        }   // get nextTime()
+
+        public get titles(): StringArrayPrintOptions {
+            return this._titles;
+        }   // get titles()
+
+        /**
          * Public methods
          */
 
         /**
-         * Adds an image to the collection of moving sprites.
+         * @param {Image} value - Image to add to the collection of moving sprites.
          */
         public addMovingSprite(value: Image): void {
             this._movingSprites.imgs.push(value)
         }   // addMovingSprite()
 
         /**
-         * Adds a sprite and related information to the collection of static sprites.
+         * @param {StaticSpriteOptions} value - Sprite and related information to add to
+         *                                      the collection of static sprites.
          */
         public addStaticSprite(value: StaticSpriteOptions): void {
             this._staticSprites.push(value)
@@ -393,6 +476,8 @@ namespace infoScreens {
 
         /**
          * Create moving sprites.
+         * @param {boolean} keepOnScreen - True = sprites will bounce off of walls
+         *                                 False = game.onUpdate() will handle off-screen sprites
          */
         protected addAllMovingSprites(keepOnScreen: boolean = true): void {
             for (let img of this._movingSprites.imgs) {
@@ -425,7 +510,7 @@ namespace infoScreens {
         }   // addStaticSprites()
 
         /**
-         * Draws text on canvas.
+         * Draws text and background image on canvas.
          */
         protected createBase(): void {
             // Check RotatingScreens._base in case release() has been called.
@@ -523,6 +608,13 @@ namespace infoScreens {
 
         /**
          * Draw multiple strings on an image, starting at a given coordinate.
+         * @param {string[]} text - Strings to print on the image
+         * @param {Image} img - Image where strings will be drawn
+         * @param {number} x - Horizontal coordinate for text; lines will be left-justified
+         * @param {number} y - Vertical coordinate where first line will print
+         * @param {number} color - Color to use when printing strings
+         * @param {image.Font} font - Font to use when printing strings
+         * @param {number} spacing - Number of pixels to place between strings
          */
         protected printMultiple(text: string[], img: Image,
             x: number, y: number, color: number, font: image.Font = null,
@@ -540,6 +632,12 @@ namespace infoScreens {
 
         /**
          * Draw multiple strings centered on an image, starting at a given vertical coordinate.
+         * @param {string[]} text - Strings to print on the image
+         * @param {Image} img - Image where strings will be drawn
+         * @param {number} y - Vertical coordinate where first line will print
+         * @param {number} color - Color to use when printing strings
+         * @param {image.Font} font - Font to use when printing strings
+         * @param {number} spacing - Number of pixels to place between strings
          */
         protected printMultipleCenter(text: string[], img: Image,
             y: number, color: number, font: image.Font = null,
@@ -563,6 +661,14 @@ namespace infoScreens {
 
         /**
          * Constructor
+         * @param {string[]} titles - Array of strings to display as the title
+         * @param {number} titlesColor - Color to use when printing titles
+         * @param {string[][]} headlines - Sets of strings to display as headlines
+         * @param {number} headlinesColor - Color to use when printing headlines
+         * @param {string[][]} instructions - Sets of strings (up to three sets) to display in the center of the screen
+         * @param {number} instructionsColor - Color to use when printing the mid-text
+         * @param {number} backColor - Color to use for the background
+         * @param {number} delay - Interval in milliseconds when screens will rotate
          */
         constructor(titles: string[], titlesColor: number = 5,
             headlines: string[][] = null, headlinesColor: number = 14,
@@ -583,10 +689,18 @@ namespace infoScreens {
         /**
          * Getters and setters
          */
+        /**
+         * @return {string[][]} Sets (up to three) of strings that will appear in the
+         *                      center of the screen
+         */
         public get instructions(): string[][] {
             return this._midText.data
         }   // get instructions()
 
+        /**
+         * @param {string[][]} value - Sets (up to three) of strings to appear in the
+         *                             center of the screen
+         */
         public set instructions(value: string[][]) {
             this._midText.data = value
         }   // set instructions()
@@ -606,6 +720,15 @@ namespace infoScreens {
 
         /**
          * Constructor
+         * @param {string[]} titles - Array of strings to display as the title
+         * @param {number} titlesColor - Color to use when printing titles
+         * @param {string[][]} headlines - Sets of strings to display as headlines
+         * @param {number} headlinesColor - Color to use when printing headlines
+         * @param {string[][]} options - Sets of strings (up to three sets) to display in the center of the screen
+         * @param {number} optionsColor - Color to use when printing the mid-text
+         * @param {boolean} hasHeaders - Whether options groups include headers
+         * @param {number} backColor - Color to use for the background
+         * @param {number} delay - Interval in milliseconds when screens will rotate
          */
         constructor(titles: string[], titlesColor: number = null,
             headlines: string[][] = null, headlinesColor: number = null,
@@ -635,6 +758,9 @@ namespace infoScreens {
             return this._cursor
         }   // get cursor()
 
+        /**
+         * @return {boolean} Whether the user has selected the "done" option
+         */
         public get done(): boolean {
             return this._isDone
         }   // get done()
@@ -648,39 +774,66 @@ namespace infoScreens {
             }   // if (value)
         }   // set done()
 
+        /**
+         * @return {string} Text displayed in the "done" button
+         */
         public get doneText(): string {
             return this._footer.data
         }   // get doneText()
 
+        /**
+         * @param {string} value - Text displayed in the "done" button
+         */
         public set doneText(value: string) {
             this._footer.data = value
         }   // set doneText()
 
+        /**
+         * @return {string[][]} Option sets (up to three)
+         */
         public get options(): string[][] {
             return this._midText.data
         }   // get options()
 
+        /**
+         * @param {string[][]} value - Option sets (up to three)
+         */
         public set options(value: string[][]) {
             this._midText.data = value
             this.buildSelectedOptions()
         }   // set options()
 
+        /**
+         * @return {number[]} Options that the user has selected
+         */
         public get selections(): number[] {
             return this._selectedOptions
         }   // get selections()
 
+        /**
+         * @return {boolean} Whether the "next" button is displayed
+         */
         public get showNext(): boolean {
             return this._showNext
         }   // get showNext()
 
+        /**
+         * @param {boolean} value - Whether the "next" button is displayed
+         */
         public set showNext(value: boolean) {
             this._showNext = value
         }   // set showNext()
 
+        /**
+         * @return {boolean} Whether the "previous" button is displayed
+         */
         public get showPrevious(): boolean {
             return this._showPrevious
         }   // get showPrevious()
 
+        /**
+         * @param {boolean} value - Whether the "previous" button is displayed
+         */
         public set showPrevious(value: boolean) {
             this._showPrevious = value
         }   // set showPrevious()
@@ -692,6 +845,7 @@ namespace infoScreens {
         /**
          * Adds an option array to the screen.
          * Option screens can accommodate up to three groups of options.
+         * @param {string[]} option - Option array to add to the screen
          */
         public addOption(option: string[]) {
             this._midText.data.push(option)
@@ -699,7 +853,7 @@ namespace infoScreens {
         }   // addOption()
 
         /**
-         * Overrides RotatingScreens.build().
+         * @see RotatingScreens#build
          */
         public build(): void {
             super.build()
@@ -708,7 +862,7 @@ namespace infoScreens {
         }   // build()
 
         /**
-         * Overrides RotatingScreens.destroySprites().
+         * @see RotatingScreens#destroySprites
          */
         public destroySprites(): void {
             super.destroySprites()
@@ -719,6 +873,8 @@ namespace infoScreens {
 
         /**
          * Gets the selected option for an option group.
+         * @param {number} index - Option group of selection to retrieve
+         * @return {number} Selected option for the given option group
          */
         public getSelection(index: number = 0): number {
             if (index < 0 || index > this._selectedOptions.length) {
@@ -837,7 +993,7 @@ namespace infoScreens {
         }   // moveCursorUp()
 
         /**
-         * Overrides RotatingScreens.refresh().
+         * @see RotatingScreens#refresh
          */
         public refresh() {
             super.refresh()
@@ -862,7 +1018,8 @@ namespace infoScreens {
 
         /**
          * Sets the selected option for a given option group.
-         * To deselect all options in an option group, pass -1 for the value.
+         * @param {number} index - Option group for selection
+         * @param {number} value - Option to select; -1 for none
          */
         public setSelection(index: number = 0, value: number = -1) {
             this._selectedOptions[index] = value
@@ -883,7 +1040,7 @@ namespace infoScreens {
         }   // buildSelectedOptions()
 
         /**
-         * Overrides RotatingScreens.createBase().
+         * @see RotatingScreens#createBase()
          */
         protected createBase() {
             super.createBase()
@@ -932,6 +1089,8 @@ namespace infoScreens {
 
         /**
          * Draws the given option as selected (i.e. in reverse)
+         * @param {number} group - Option group for selection
+         * @param {number} option - Option to draw as selected
          */
         protected drawSelection(group: number, option: number) {
             if (!RotatingScreens._base) {
@@ -1052,6 +1211,12 @@ namespace infoScreens {
 
         /**
          * Constructor
+         * @param {string[]} titles - Array of strings to display as the title
+         * @param {number} titlesColor - Color to use when printing titles
+         * @param {string[][]} headlines - Sets of strings to display as headlines
+         * @param {number} headlinesColor - Color to use when printing headlines
+         * @param {number} backColor - Color to use for the background
+         * @param {number} delay - Interval in milliseconds when screens will rotate
          */
         constructor(titles: string[], titlesColor: number = null,
             headlines: string[][] = null, headlinesColor: number = null,
@@ -1073,20 +1238,33 @@ namespace infoScreens {
         /**
          * Getters and setters
          */
+        /**
+         * @return {number} Index of current screen
+         */
         public get currScreen(): number {
             return this._currOptScreen
         }   // get currScreen()
 
+        /**
+         * @param {number} value - Index of current screen
+         */
         public set currScreen(value: number) {
             this.saveSelections()
             this._currOptScreen = value
             this.rebuild()
         }   // set currScreen
 
+        /**
+         * Returns selections for current screen.
+         * @see OptionScreen#selections
+         */
         public get selections(): number[] {
             return this._selectedOptionsColl[this._currScreen]
         }   // get selections()
 
+        /**
+         * @return {number[][]} Selections for all screens in the collection
+         */
         public get selectionsAllScreens(): number[][] {
             return this._selectedOptionsColl
         }   // get selectionsAllScreens()
@@ -1101,8 +1279,11 @@ namespace infoScreens {
 
         /**
          * Adds a screen to the options screen collection.
+         * @param {string} name - Name of option group to show in the tabs
+         * @param {string[][]} options - Option groups (up to three) to show on screen
+         * @param {boolean} hasHeaders - Whether option groups contain headers
          */
-        public addScreen(name: string, options: string[][], hasHeaders: boolean = false) {
+        public addScreen(name: string, options: string[][], hasHeaders: boolean = false): void {
             if (this._currOptScreen === -1) {
                 this._currOptScreen = 0
             }   // if (this._currOptScreen === -1)
@@ -1123,7 +1304,7 @@ namespace infoScreens {
         }   // addScreen
 
         /**
-         * Overrides OptionScreen.build().
+         * @see OptionScreen#build
          */
         public build(): void {
             this.setBase()
@@ -1131,7 +1312,7 @@ namespace infoScreens {
         }   // build()
 
         /**
-         * Overrides OptionScreen.getSelection().
+         * @see OptionScreen#getSelection
          */
         public getSelection(index: number = 0): number {
             return this._selectedOptionsColl[this._currOptScreen][index]
@@ -1139,13 +1320,15 @@ namespace infoScreens {
 
         /**
          * Gets the selected option for the given option screen and group.
+         * @param {number} screen - Screen in collection
+         * @param {number} index - Option group for selection
          */
         public getSelectionForScreen(screen: number, index: number = 0): number {
             return this._selectedOptionsColl[screen][index]
         }   // getSelectionForScreen
 
         /**
-         * Overrides OptionScreen.select().
+         * @see OptionScreen#select
          */
         public select() {
             super.select()
@@ -1170,7 +1353,7 @@ namespace infoScreens {
         }   // select()
 
         /**
-         * Overrides OptionScreen.setSelection().
+         * @see OptionScreen#setSelection
          */
         public setSelection(index: number = 0, value: number = -1): void {
             super.setSelection(index, value)
@@ -1179,6 +1362,9 @@ namespace infoScreens {
 
         /**
          * Sets the selected option for the given option screen and group.
+         * @param {number} screen - Screen in collection
+         * @param {number} index - Option group for selection
+         * @param {number} value - Option to select; -1 for none
          */
         public setSelectionForScreen(screen: number, index: number = 0, value: number = -1): void {
             this._selectedOptionsColl[screen][index] = value
@@ -1207,6 +1393,15 @@ namespace infoScreens {
 
         /**
          * Draws a tab on the screen.
+         * @param {string} text - Text to display in tab
+         * @param {image.Font} font - Font to use when printing text
+         * @param {number} x - Horizontal coordinate for tab
+         * @param {number} y - Vertical coordinate for tab
+         * @param {number} width - Width of tab
+         * @param {number} height - Height of tab
+         * @param {number} textColor - Color to use when printing text
+         * @param {number} backColor - Color for background of tab
+         * @param {number} borderColor - Color for border of tab
          */
         protected drawTab(text: string, font: image.Font,
             x: number, y: number, width: number, height: number,
