@@ -213,7 +213,7 @@ osColl.setSelectionForScreen(1, 0, 0) // Second screen, first (and only) option 
 
 ## TODO
 
-- [ ] Add a reference for your blocks here
+- [X] See it in action here: https://makecode.com/_cp357aE7JMEx
 - [ ] Add "icon.png" image (300x200) in the root folder
 - [X] Add "- beta" to the GitHub project description if you are still iterating it.
 - [X] Turn on your automated build on https://travis-ci.org
