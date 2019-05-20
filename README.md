@@ -11,11 +11,15 @@
 - [ ] Use "pxt bump" to create a tagged release on GitHub
 - [ ] Get your package reviewed and approved https://arcade.makecode.com/extensions/approval
 
-Read more at https://arcade.makecode.com/extensions
+Visit the following links to read more about building MakeCode custom blocks and extensions:
+
+- https://arcade.makecode.com/blocks/custom
+- https://makecode.com/defining-blocks
+- https://makecode.com/extensions/getting-started
 
 ## License
 
-
+MIT License. See LICENSE for more information.
 
 ## Supported targets
 

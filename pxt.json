@@ -7,10 +7,13 @@
     },
     "files": [
         "README.md",
-        "main.ts"
+        "main.ts",
+        "info-screens.ts"
     ],
     "testFiles": [
         "test.ts"
     ],
-    "public": false
+    "public": false,
+    "installedVersion": "workspace:b1cc3f9a-993c-43ce-2e57-abff2d1bf98f",
+    "preferredEditor": "tsprj"
 }
