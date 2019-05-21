@@ -417,6 +417,7 @@ namespace infoScreens {
          */
         public release(): void {
             RotatingScreens._base = null
+            this.destroySprites()
         }   // release()
 
         /**
