@@ -293,6 +293,20 @@ namespace infoScreens {
         }   // set backImage()
 
         /**
+         * @return {Image} Common canvas
+         */
+        public static get canvas(): Image {
+            return RotatingScreens._base
+        }   // get canvas()
+
+        /**
+         * @param (Image) value - Image to use for common canvas
+         */
+        public static set canvas(value: Image) {
+            RotatingScreens._base = value
+        }   // set canvas()
+
+        /**
          * @return {number} Interval in milliseconds when screens will rotate
          */
         public get delay(): number {
@@ -568,7 +582,8 @@ namespace infoScreens {
                     this._headlines.y = this._backImage.height
                 }   // if (this._backImage.height > minY)
             } else {
-                this._headlines.y = this._titles.font.charHeight * this._titles.data.length + this._titles.data.length + 3
+                this._headlines.y = this._titles.font.charHeight * this._titles.data.length + this._titles.data.length +
+                    DEFAULT_Y_TITLES + 2
             }   // if (this._backImage)
 
             // Calculate vertical coordinate for moving sprites.
