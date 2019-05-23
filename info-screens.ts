@@ -203,11 +203,12 @@ namespace infoScreens {
         protected _backImage: Image  // user-supplied background image
         protected _currScreen: number // index of image currently shown
         protected _currSprite: number
-        protected _footer: StringPrintOptions;
-        protected _headlines: String2dArrayPrintOptions;
-        protected _midText: String2dArrayPrintOptions;
-        protected _titles: StringArrayPrintOptions;
-        protected _movingSprites: MovingSpriteOptions;
+        protected _footer: StringPrintOptions
+        protected _headlines: String2dArrayPrintOptions
+        protected _midText: String2dArrayPrintOptions
+        protected _titles: StringArrayPrintOptions
+        protected _movingSprites: MovingSpriteOptions
+        protected _movingSpritesSequential: boolean
         protected _interval: number // interval in milliseconds for screens to rotate
         protected _next: number // next scheduled time to rotate screens
         protected _staticSprites: StaticSpriteOptions[] // container for static sprites
@@ -236,6 +237,7 @@ namespace infoScreens {
             this._backColor = backColor == null ? DEFAULT_COLOR_BG : backColor
             this._backImage = null
             this._interval = delay == null ? DEFAULT_DELAY : delay
+            this._movingSpritesSequential = true
             this._staticSprites = []
 
             this._footer = {
@@ -348,6 +350,24 @@ namespace infoScreens {
             return this._next
         }   // get nextTime()
 
+        /**
+         * @return {boolean} Whether sprites will be displayed sequentially or randomly.
+         *                   True = in order, false = randomly.
+         *                   Only applies to Blank Space mode.
+         */
+        public get sequentialSprites(): boolean {
+            return this._movingSpritesSequential
+        }   // get sequentialSprites()
+
+        /**
+         * @param {boolean} value - Whether sprites will be displayed sequentially or randomly.
+         *                          True = in order, false = randomly.
+         *                          Only applies to Blank Space mode.
+         */
+        public set sequentialSprites(value: boolean) {
+            this._movingSpritesSequential = value
+        }   // set sequentialSprites()
+
         public get titles(): StringArrayPrintOptions {
             return this._titles;
         }   // get titles()
@@ -459,10 +479,14 @@ namespace infoScreens {
          * Call from game.onUpdate()
          */
         public showScrollingSprite(): void {
-            this._currSprite++
-            if (this._currSprite < 0 || this._currSprite >= this._movingSprites.imgs.length) {
-                this._currSprite = 0
-            }   // if (this._currSprite > this._movingSprites.length)
+            if (this._movingSpritesSequential) {
+                this._currSprite++
+                if (this._currSprite < 0 || this._currSprite >= this._movingSprites.imgs.length) {
+                    this._currSprite = 0
+                }   // if (this._currSprite > this._movingSprites.length)
+            } else {
+                this._currSprite = Math.randomRange(0, this._movingSprites.imgs.length - 1)
+            }   // if (this._movingSpritesSequential)
             let newSprite: Sprite = sprites.create(this._movingSprites.imgs[this._currSprite].clone(),
                 SpriteType.Moving)
             newSprite.setFlag(SpriteFlag.Ghost, true)
