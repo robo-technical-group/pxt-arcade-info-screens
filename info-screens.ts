@@ -234,30 +234,30 @@ class RotatingScreens {
         this._currSprite = -1;
         this._backColor = backColor == null ? DEFAULT_COLOR_BG : backColor
         this._backImage = null
-        this._interval = delay == null ? DEFAULT_DELAY : delay
+        this._interval = delay ? delay : DEFAULT_DELAY
         this._movingSpritesSequential = true
         this._staticSprites = []
 
         this._footer = {
-            data: footer == null ? '' : footer,
+            data: footer ? footer : '',
             color: footerColor == null ? DEFAULT_COLOR_FOOTER : footerColor,
             font: DEFAULT_FONT_FOOTER,
             y: 0
         }
         this._headlines = {
-            data: headlines,
+            data: headlines ? headlines : [],
             color: headlinesColor == null ? DEFAULT_COLOR_HEADLINE : headlinesColor,
             font: DEFAULT_FONT_HEADLINE,
             y: 0
         }
         this._midText = {
-            data: midText,
+            data: midText ? midText : [],
             color: midTextColor == null ? DEFAULT_COLOR_MID_TEXT : midTextColor,
             font: DEFAULT_FONT_MID_TEXT,
             y: 0
         }
         this._titles = {
-            data: titles,
+            data: titles ? titles : [],
             color: titlesColor == null ? DEFAULT_COLOR_TITLE : titlesColor,
             font: DEFAULT_FONT_TITLE,
             y: DEFAULT_Y_TITLES
@@ -320,6 +320,7 @@ class RotatingScreens {
     //% blockId="infoScreens_RotatingScreens_delay_get"
     //% block="delay (milliseconds)"
     //% blockCombine
+    //% callInDebugger
     public get delay(): number {
         return this._interval
     }   // get delay()
@@ -339,18 +340,22 @@ class RotatingScreens {
         }   // if (value)
     }   // set delay()
 
+    //% callInDebugger
     public get footer(): StringPrintOptions {
         return this._footer;
     }   // get footer()
 
+    //% callInDebugger
     public get headlines(): String2dArrayPrintOptions {
         return this._headlines;
     }   // get headlines()
 
+    //% callInDebugger
     public get midText(): String2dArrayPrintOptions {
         return this._midText;
     }   // get midText()
 
+    //% callInDebugger
     public get movingSpriteOptions(): MovingSpriteOptions {
         return this._movingSprites;
     }   // get movingSpriteOptions()
@@ -362,6 +367,7 @@ class RotatingScreens {
     //% blockId="infoScreens_RotatingScreens_nextTime"
     //% block="time to rotate"
     //% blockCombine
+    //% callInDebugger
     public get nextTime(): number {
         return this._next
     }   // get nextTime()
@@ -371,6 +377,7 @@ class RotatingScreens {
      *                   True = in order, false = randomly.
      *                   Only applies to Blank Space mode.
      */
+    //% callInDebugger
     public get sequentialSprites(): boolean {
         return this._movingSpritesSequential
     }   // get sequentialSprites()
@@ -384,6 +391,7 @@ class RotatingScreens {
         this._movingSpritesSequential = value
     }   // set sequentialSprites()
 
+    //% callInDebugger
     public get titles(): StringArrayPrintOptions {
         return this._titles;
     }   // get titles()
@@ -391,6 +399,16 @@ class RotatingScreens {
     /**
      * Public methods
      */
+
+    /**
+     * @param {string[]} value - Headlines to add.
+     */
+    //% blockId="infoScreens.RotatingScreens.addHeadlines"
+    //% block="%mySplashScreen|add headlines %value"
+    //% value.shadow="variables_get" value.defl="text list"
+    public addHeadlines(value: string[]) {
+        this._headlines.data.push(value)
+    }   // addHeadlines()
 
     /**
      * @param {Image} value - Image to add to the collection of moving sprites.
@@ -401,6 +419,13 @@ class RotatingScreens {
     public addMovingSprite(value: Image): void {
         this._movingSprites.imgs.push(value)
     }   // addMovingSprite()
+
+    /**
+     * @param {string[]} value - Mid-text group to add.
+     */
+    public addMidText(value: string[]): void {
+        this._midText.data.push(value)
+    }   // addMidText()
 
     /**
      * @param {StaticSpriteOptions} value - Sprite and related information to add to
@@ -418,7 +443,7 @@ class RotatingScreens {
      * Call when ready to present rotating screens after object has been configured.
      */
     //% blockId="infoScreens_RotatingScreens_build"
-    //% block="%mySplashScreen|build"
+    //% block="%mySplashScreen|show"
     public build(): void {
         this.destroySprites()
         this.rebuild()
@@ -609,7 +634,7 @@ class RotatingScreens {
         // Set initial vertical coordinate for mid-text.
         // Will be adjusted if mid-text exists.
         this._midText.y = screen.height - 10
-        if (this._midText.data.length > 0) {
+        if (this._midText.data && this._midText.data.length > 0) {
             this._midText.y = screen.height -
                 ((this._midText.font.charHeight + 1) * (this._midText.data[0].length + 1) + 6)
             switch (this._midText.data.length) {
@@ -647,8 +672,12 @@ class RotatingScreens {
                 this._headlines.y = this._backImage.height
             }   // if (this._backImage.height > minY)
         } else {
-            this._headlines.y = this._titles.font.charHeight * this._titles.data.length + this._titles.data.length +
-                DEFAULT_Y_TITLES + 2
+            if (this._titles.data) {
+                this._headlines.y = this._titles.font.charHeight * this._titles.data.length + this._titles.data.length +
+                    DEFAULT_Y_TITLES + 2
+            } else {
+                this._headlines.y = DEFAULT_Y_TITLES + 2
+            }   // if (this._titles.data)
         }   // if (this._backImage)
 
         // Calculate vertical coordinate for moving sprites.
@@ -676,15 +705,17 @@ class RotatingScreens {
         if (!RotatingScreens._base) {
             return
         }   // if (!RotatingScreens._base)
-        let lines: string[] = this._headlines.data[this._currScreen]
-        if (lines) {
-            // Clear out current headline
-            RotatingScreens._base.fillRect(0, this._headlines.y, screen.width,
-                lines.length * (this._headlines.font.charHeight + 1),
-                this._backColor)
-            this.printMultipleCenter(lines, RotatingScreens._base,
-                this._headlines.y, this._headlines.color, this._headlines.font)
-        }   // if (line)
+        if (this._headlines.data) {
+            let lines: string[] = this._headlines.data[this._currScreen]
+            if (lines) {
+                // Clear out current headline
+                RotatingScreens._base.fillRect(0, this._headlines.y, screen.width,
+                    lines.length * (this._headlines.font.charHeight + 1),
+                    this._backColor)
+                this.printMultipleCenter(lines, RotatingScreens._base,
+                    this._headlines.y, this._headlines.color, this._headlines.font)
+            }   // if (line)
+        }
     }   // drawCurrHeadline()
 
     /**
@@ -727,11 +758,13 @@ class RotatingScreens {
             font = DEFAULT_FONT
         }   // if (!font)
 
-        let currY: number = y;
-        for (let t of text) {
-            img.printCenter(t, currY, color, font);
-            currY += (font.charHeight + spacing);
-        }   // for ( t )
+        if (text) {
+            let currY: number = y;
+            for (let t of text) {
+                img.printCenter(t, currY, color, font);
+                currY += (font.charHeight + spacing);
+            }   // for ( t )
+        }   // if (text)
     }   // printMultipleCenter()
 }   // class RotatingScreens
 
@@ -752,10 +785,10 @@ class SplashScreens extends RotatingScreens {
      * @param {number} backColor - Color to use for the background
      * @param {number} delay - Interval in milliseconds when screens will rotate
      */
-    constructor(titles: string[], titlesColor: number = 5,
-        headlines: string[][] = null, headlinesColor: number = 14,
-        instructions: string[][] = null, instructionsColor: number = 9,
-        backColor: number = 15, delay: number = 5000) {
+    constructor(titles: string[], titlesColor?: number,
+        headlines: string[][] = null, headlinesColor?: number,
+        instructions: string[][] = null, instructionsColor?: number,
+        backColor?: number, delay?: number) {
         super(titles,
             titlesColor,
             headlines,
@@ -786,6 +819,17 @@ class SplashScreens extends RotatingScreens {
     public set instructions(value: string[][]) {
         this._midText.data = value
     }   // set instructions()
+
+    /**
+     * Add a list of instructions.
+     * @param {string[]} value - List of instructions to add to the screen.
+     */
+    //% blockId=infoScreens_SplashScreens_addInstructionsList
+    //% block="%mySplashScreen|add instructions list %value"
+    //% value.shadow="variables_get" value.defl="text list"
+    public addInstructionsList(value: string[]) {
+        this._midText.data.push(value)
+    }   // addInstructionsList
 }   // class SplashScreens
 
 //% blockNamespace=infoScreens
