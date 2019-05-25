@@ -232,7 +232,7 @@ class RotatingScreens {
     ) {
         this._currScreen = -1;
         this._currSprite = -1;
-        this._backColor = backColor == null ? DEFAULT_COLOR_BG : backColor
+        this._backColor = backColor ? backColor : DEFAULT_COLOR_BG
         this._backImage = null
         this._interval = delay ? delay : DEFAULT_DELAY
         this._movingSpritesSequential = true
@@ -240,25 +240,25 @@ class RotatingScreens {
 
         this._footer = {
             data: footer ? footer : '',
-            color: footerColor == null ? DEFAULT_COLOR_FOOTER : footerColor,
+            color: footerColor ? footerColor : DEFAULT_COLOR_FOOTER,
             font: DEFAULT_FONT_FOOTER,
             y: 0
         }
         this._headlines = {
             data: headlines ? headlines : [],
-            color: headlinesColor == null ? DEFAULT_COLOR_HEADLINE : headlinesColor,
+            color: headlinesColor ? headlinesColor : DEFAULT_COLOR_HEADLINE,
             font: DEFAULT_FONT_HEADLINE,
             y: 0
         }
         this._midText = {
             data: midText ? midText : [],
-            color: midTextColor == null ? DEFAULT_COLOR_MID_TEXT : midTextColor,
+            color: midTextColor ? midTextColor : DEFAULT_COLOR_MID_TEXT,
             font: DEFAULT_FONT_MID_TEXT,
             y: 0
         }
         this._titles = {
             data: titles ? titles : [],
-            color: titlesColor == null ? DEFAULT_COLOR_TITLE : titlesColor,
+            color: titlesColor ? titlesColor : DEFAULT_COLOR_TITLE,
             font: DEFAULT_FONT_TITLE,
             y: DEFAULT_Y_TITLES
         }
