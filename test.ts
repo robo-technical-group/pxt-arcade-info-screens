@@ -29,28 +29,28 @@ const FIRST_OPTION_SCREEN: number = 5
 /**
  * Global variables
  */
-let splashes: infoScreens.RotatingScreens[] = []
+let splashes: RotatingScreens[] = []
 let currSplash: number = -1
-let newSplash: infoScreens.SplashScreens = null
+let newSplash: SplashScreens = null
 
 /**
  * Main (a.k.a. game.onStart())
  */
 
 // Template splash screen
-splashes.push(new infoScreens.SplashScreens(
+splashes.push(new SplashScreens(
     ['My Game', 'in JavaScript'], Color.Yellow,
     [['My Game is', '(C) 20XX'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Me']], Color.Brown,
     [['Left/Right = Action', 'Up = Action', 'Down = Action', 'A = Action', 'B = Action']], Color.LightBlue)
 )
 
 // Asteroids splash screen with wandering asteroids
-newSplash = new infoScreens.SplashScreens(
+newSplash = new SplashScreens(
     ['Asteroids'], Color.Yellow,
     [['Asteroids is', '(C) 1979 Atari Inc.'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Alex K.']], Color.Brown,
     [['Left/Right = Rotate', 'Up = Thursters', 'A = Shoot', 'B = Hyperspace']], Color.LightBlue
 )
-newSplash.movingSpriteOptions.mode = infoScreens.SpriteMode.RandomWillUpdate
+newSplash.movingSpriteOptions.mode = SpriteMode.RandomWillUpdate
 newSplash.movingSpriteOptions.speed = 10
 newSplash.addMovingSprite(
     img`
@@ -163,14 +163,14 @@ newSplash.addMovingSprite(
 splashes.push(newSplash)
 
 // Salvo splash screen with scrolling ships
-newSplash = new infoScreens.SplashScreens(
+newSplash = new SplashScreens(
     ['Salvo!'], Color.Yellow,
     [['(C) 2019', 'Robo Technical Group LLC'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Alex K.']], Color.Brown,
     [['Multiplayer Version', 'Up to four', 'human or computer', 'players']], Color.LightBlue
 )
-newSplash.movingSpriteOptions.mode = infoScreens.SpriteMode.BlankSpace
+newSplash.movingSpriteOptions.mode = SpriteMode.BlankSpace
 newSplash.movingSpriteOptions.speed = 10
-newSplash.movingSpriteOptions.dir = infoScreens.SpriteDirection.PointsLeft
+newSplash.movingSpriteOptions.dir = SpriteDirection.PointsLeft
 newSplash.addMovingSprite(
     img`
         . . . . . . . . . . . . . . . . 1 1 1 1 1 . . . . . . . . . . .
@@ -214,7 +214,7 @@ newSplash.addMovingSprite(
 splashes.push(newSplash)
 
 // Spacewar! splash screen with static sprites
-newSplash = new infoScreens.SplashScreens(
+newSplash = new SplashScreens(
     ['Spacewar!'], Color.BrightGreen,
     [['Spacewar! was', 'developed in 1962'], ['Programmed by', 'Steve Russell'], ['Collaborator', 'Martin Graetz'], ['Collaborator', 'Wayne Wiitanen'], ['Collaborator', 'Bob Saunders'], ['Collaborator', 'Steve Piner'], ['Programmed in ', 'MakeCode Arcade'], ['by', 'Alex K.']], Color.Brown,
     [['Player 1', 'A/D', 'W', 'Q', 'E'],
@@ -271,7 +271,7 @@ splashes.push(newSplash)
 
 // Splash screen with header image
 // Uses part of the title image from Planet Putt Putt
-newSplash = new infoScreens.SplashScreens(
+newSplash = new SplashScreens(
     [''], Color.Yellow,
     [['My Game is', '(C) 20XX'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Me']], Color.Brown,
     [['Left/Right = Action', 'Up = Action', 'Down = Action', 'A = Action', 'B = Action']], Color.LightBlue)
@@ -332,7 +332,7 @@ newSplash.backImage = header
 splashes.push(newSplash)
 
 // Single option screen
-let os: infoScreens.OptionScreen = new infoScreens.OptionScreen(
+let os: OptionScreen = new OptionScreen(
     ['Salvo!'], Color.Yellow,
     [['Options', ''], ['Salvo! is (C) 2019', 'Robo Technical Group LLC'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Alex K.']], Color.Brown,
     [['Human', '0 players', '1 player', '2 players', '3 players', '4 players'], ['Computer', '0 players', '1 player', '2 players', '3 players', '4 players']], Color.LightBlue,
@@ -347,7 +347,7 @@ os.setSelection(1, 0)
 splashes.push(os)
 
 // Option screen collection
-let osColl: infoScreens.OptionScreenCollection = new infoScreens.OptionScreenCollection(
+let osColl: OptionScreenCollection = new OptionScreenCollection(
     ['Salvo!'], Color.Yellow,
     [['Options', ''], ['Salvo! is (C) 2019', 'Robo Technical Group LLC'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Alex K.']], Color.Brown
 )
@@ -377,7 +377,7 @@ game.onUpdate(function () {
     }   // if (game.runtime() >= splashes[currSplash].nextTime)
     switch (currSplash) {
         case 1:
-            for (let sprite of sprites.allOfKind(infoScreens.SpriteType.Moving)) {
+            for (let sprite of sprites.allOfKind(SpriteType.Moving)) {
                 let threshold: number = sprite.width / 2
                 if (sprite.x > scene.screenWidth() + threshold) {
                     sprite.x = 0 - threshold
@@ -395,7 +395,7 @@ game.onUpdate(function () {
             break
 
         case 2:
-            if (sprites.allOfKind(infoScreens.SpriteType.Moving).length === 0) {
+            if (sprites.allOfKind(SpriteType.Moving).length === 0) {
                 splashes[currSplash].showScrollingSprite()
             }   // if (sprites.allOfKind(...))
             break
@@ -409,7 +409,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currSplash < FIRST_OPTION_SCREEN) {
         nextSplash()
     } else {
-        let curr: infoScreens.OptionScreen = <infoScreens.OptionScreen>splashes[currSplash]
+        let curr: OptionScreen = <OptionScreen>splashes[currSplash]
         curr.select()
         if (curr.done) {
             let numPlayers: number
@@ -444,7 +444,7 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currSplash < FIRST_OPTION_SCREEN) {
         nextSplash()
     } else {
-        let curr: infoScreens.OptionScreen = <infoScreens.OptionScreen>splashes[currSplash]
+        let curr: OptionScreen = <OptionScreen>splashes[currSplash]
         curr.moveCursorDown()
     }   // if (currSplash < FIRST_OPTION_SCREEN)
 })  // controller.down()
@@ -453,7 +453,7 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currSplash < FIRST_OPTION_SCREEN) {
         nextSplash()
     } else {
-        let curr: infoScreens.OptionScreen = <infoScreens.OptionScreen>splashes[currSplash]
+        let curr: OptionScreen = <OptionScreen>splashes[currSplash]
         curr.moveCursorLeft()
     }   // if (currSplash < FIRST_OPTION_SCREEN)
 })  // controller.left()
@@ -462,7 +462,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currSplash < FIRST_OPTION_SCREEN) {
         nextSplash()
     } else {
-        let curr: infoScreens.OptionScreen = <infoScreens.OptionScreen>splashes[currSplash]
+        let curr: OptionScreen = <OptionScreen>splashes[currSplash]
         curr.moveCursorRight()
     }   // if (currSplash < FIRST_OPTION_SCREEN)
 })  // controller.right()
@@ -471,7 +471,7 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currSplash < FIRST_OPTION_SCREEN) {
         nextSplash()
     } else {
-        let curr: infoScreens.OptionScreen = <infoScreens.OptionScreen>splashes[currSplash]
+        let curr: OptionScreen = <OptionScreen>splashes[currSplash]
         curr.moveCursorUp()
     }   // if (currSplash < FIRST_OPTION_SCREEN)
 })  // controller.up()
