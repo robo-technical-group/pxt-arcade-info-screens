@@ -219,7 +219,7 @@ osColl.setSelectionForScreen(1, 0, 0) // Second screen, first (and only) option 
 - [X] Turn on your automated build on https://travis-ci.org
 - [X] Use "pxt bump" to create a tagged release on GitHub
 - [ ] Get your package reviewed and approved https://arcade.makecode.com/extensions/approval
-- [X] Add blocks implementation (done - version 1.0.8).
+- [X] Add blocks implementation (done - version 1.0.6).
 - [X] Add RotatingScreens.release() to blocks (done - version 1.0.9).
 
 Visit the following links to read more about building MakeCode custom blocks and extensions:
