@@ -1,7 +1,7 @@
 # pxt-arcade-info-screens
 
 Extension used to build a variety of information screens, like splash screens and screens for selecting options.
-JavaScript only (for now).
+Blocks and JavaScript interfaces available.
 
 [![Build Status](https://travis-ci.com/robo-technical-group/pxt-arcade-info-screens.svg?branch=master)](https://travis-ci.com/robo-technical-group/pxt-arcade-info-screens)
 
@@ -9,8 +9,8 @@ JavaScript only (for now).
 
 ### Splash Screens
 ```typescript
-let splash: infoScreens.SplashScreens =
-    new infoScreens.SplashScreens(
+let splash: SplashScreens =
+    new SplashScreens(
         // First two arguments are the titles:
         // An array of strings for the text in the title,
         // followed by a color.
@@ -61,7 +61,7 @@ splash.footer.font = image.font5
 
 ```typescript
 // Sprites will bounce around the screen.
-splash.movingSpriteOptions.mode = infoScreens.SpriteMode.Random
+splash.movingSpriteOptions.mode = SpriteMode.Random
 splash.movingSpriteOptions.speed = 10
 splash.addMovingSprite(
     img``
@@ -77,12 +77,12 @@ splash.addMovingSprite(
 ```typescript
 // Sprites will scroll left-to-right or right-to-left
 // in the "blank space" between the headlines and the instructions
-splash.movingSpriteOptions.mode = infoScreens.SpriteMode.BlankSpace
+splash.movingSpriteOptions.mode = SpriteMode.BlankSpace
 splash.movingSpriteOptions.speed = 10
 
 // Tell the splash screen which direction your images point
 // The images will be flipped if they are pointing backwards relative to the motion
-splash.movingSpriteOptions.dir = infoScreens.SpriteDirection.PointsLeft
+splash.movingSpriteOptions.dir = SpriteDirection.PointsLeft
 splash.addMovingSprite(
     img``
 )
@@ -108,7 +108,7 @@ splash.addStaticSprite({
 
 ### Option screen
 ```typescript
-let os: infoScreens.OptionScreen = new infoScreens.OptionScreen(
+let os: OptionScreen = new OptionScreen(
     // Titles
     ['Salvo!'], Color.Yellow,
 
@@ -175,8 +175,8 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 
 ### Option screen collection
 ```typescript
-let osColl: infoScreens.OptionScreenCollection =
-    new infoScreens.OptionScreenCollection(
+let osColl: OptionScreenCollection =
+    new OptionScreenCollection(
         // Titles
         ['Salvo!'], Color.Yellow,
 
@@ -219,6 +219,8 @@ osColl.setSelectionForScreen(1, 0, 0) // Second screen, first (and only) option 
 - [X] Turn on your automated build on https://travis-ci.org
 - [X] Use "pxt bump" to create a tagged release on GitHub
 - [ ] Get your package reviewed and approved https://arcade.makecode.com/extensions/approval
+- [X] Add blocks implementation (done - version 1.0.8).
+- [X] Add RotatingScreens.release() to blocks (done - version 1.0.9).
 
 Visit the following links to read more about building MakeCode custom blocks and extensions:
 

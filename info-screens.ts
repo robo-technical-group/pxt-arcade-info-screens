@@ -500,6 +500,8 @@ class RotatingScreens {
     /**
      * Releases the canvas so that it can be garbage-collected.
      */
+    //% blockId="infoScreens_RotatingScreens_release"
+    //% block="%mySplashScreen|destroy resources"
     public release(): void {
         RotatingScreens._base = null
         this.destroySprites()
