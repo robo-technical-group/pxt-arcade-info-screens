@@ -361,6 +361,28 @@ class RotatingScreens {
     }   // get movingSpriteOptions()
 
     /**
+     * @return {SpriteMode} Mode for moving sprites.
+     */
+    //% blockId="infoScreens_RotatingScreens_movingSpriteMode_get"
+    //% block="mode for moving sprites"
+    //% blockCombine
+    //% hidden
+    public get movingSpriteMode(): SpriteMode {
+        return this._movingSprites.mode
+    }   // get movingSpriteMode()
+
+    /**
+     * @param {SpriteMode} value - Mode for moving sprites.
+     */
+    //% blockId="infoScreens_RotatingScreens_movingSpriteMode_set"
+    //% block="mode for moving sprites"
+    //% blockCombine
+    //% hidden
+    public set movingSpriteMode(value: SpriteMode) {
+        this._movingSprites.mode = value
+    }   // set movingSpriteMode()
+
+    /**
      * @return {number} Next <code>game.runtime()</code> when screens should be rotated;
      *                  call @see #rotate to do so
      */
