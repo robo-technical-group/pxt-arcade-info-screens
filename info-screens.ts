@@ -355,6 +355,17 @@ class RotatingScreens {
         return this._midText;
     }   // get midText()
 
+    /**
+     * @return {number} Number of moving sprites on screen.
+     */
+    //% blockId="infoScreens_RotatingScreens_movingSpriteCount"
+    //% block="count of moving sprites on screen"
+    //% blockCombine
+    //% hidden
+    public get movingSpriteCount(): number {
+        return sprites.allOfKind(SpriteType.Moving).length
+    }   // get movingSpriteCount()
+
     //% callInDebugger
     public get movingSpriteOptions(): MovingSpriteOptions {
         return this._movingSprites;
