@@ -439,7 +439,7 @@ class RotatingScreens {
     //% blockId="infoScreens.RotatingScreens.addHeadlines"
     //% block="%mySplashScreen|add headlines %value"
     //% value.shadow="variables_get" value.defl="text list"
-    public addHeadlines(value: string[]) {
+    public addHeadlines(value: string[]): void {
         this._headlines.data.push(value)
     }   // addHeadlines()
 
@@ -464,12 +464,27 @@ class RotatingScreens {
      * @param {StaticSpriteOptions} value - Sprite and related information to add to
      *                                      the collection of static sprites.
      */
-    //% blockId="infoScreens_RotatingScreens_addStaticSprite"
-    //% block="%mySplashScreen|add image %value"
-    //% value.shadow="variables_get" value.defl="myImage"
     public addStaticSprite(value: StaticSpriteOptions): void {
         this._staticSprites.push(value)
     }   // addStaticSprite()
+	
+	/**
+	 * @param {Image} img - Image to use for new static sprite.
+	 * @param {number} x - Horizontal coordinate for new sprite.
+	 * @param {number} y - Vertical coordinate for new sprite.
+	 */
+    //% blockId="infoScreens_RotatingScreens_addStaticSprite"
+    //% block="%mySplashScreen|add image %img at location x %x y %y"
+    //% img.shadow="variables_get" img.defl="myImage"
+	//% x.defl=0 y.defl=0
+	//% hidden
+	public addStaticSpriteImage(img: Image, x: number, y: number): void {
+		this._staticSprites.push({
+			img: img,
+			x: x,
+			y: y
+		})
+	}	// addStaticSpriteImage()
 
     /**
      * Initializes canvas and creates sprites.
@@ -508,7 +523,7 @@ class RotatingScreens {
     }   // clearMovingSprites()
 
     /**
-     * Destroys all moving and static sprites from the game.
+     * Destroy all moving and static sprites from the game.
      * Call when removing the splash screen from the game.
      */
     //% blockId="infoScreens_RotatingScreens_destroySprites"
@@ -523,7 +538,7 @@ class RotatingScreens {
     }   // destroySprites()
 
     /**
-     * Initializes canvas.
+     * Initialize canvas.
      * Call after initial build() if configuration changes.
      */
     public rebuild(): void {
@@ -531,7 +546,7 @@ class RotatingScreens {
     }   // rebuild()
 
     /**
-     * Releases the canvas so that it can be garbage-collected.
+     * Release the canvas so that it can be garbage-collected.
      */
     //% blockId="infoScreens_RotatingScreens_release"
     //% block="%mySplashScreen|destroy resources"
@@ -541,7 +556,7 @@ class RotatingScreens {
     }   // release()
 
     /**
-     * Updates canvas with the current headline.
+     * Update canvas with the current headline.
      * Set time for next update.
      */
     public refresh(): void {
@@ -1009,7 +1024,7 @@ class OptionScreen extends RotatingScreens {
      * Option screens can accommodate up to three groups of options.
      * @param {string[]} option - Option array to add to the screen
      */
-    public addOption(option: string[]) {
+    public addOption(option: string[]): void {
         this._midText.data.push(option)
         this.buildSelectedOptions()
     }   // addOption()
@@ -1166,7 +1181,7 @@ class OptionScreen extends RotatingScreens {
      * Marks the current option as selected.
      * Call from a controller event handler.
      */
-    public select() {
+    public select(): void {
         if (this._isInFooter) {
             if (this._cursor.currGroup === FooterLocation.Done) {
                 this.done = true
@@ -1183,7 +1198,7 @@ class OptionScreen extends RotatingScreens {
      * @param {number} index - Option group for selection
      * @param {number} value - Option to select; -1 for none
      */
-    public setSelection(index: number = 0, value: number = -1) {
+    public setSelection(index: number = 0, value: number = -1): void {
         this._selectedOptions[index] = value
     }   // setSelection()
 
@@ -1442,7 +1457,7 @@ class OptionScreenCollection extends OptionScreen {
 
     /**
      * Adds a screen to the options screen collection.
-     * @param {string} name - Name of option group to show in the tabs
+     * @param {string} name - Name of screen (shows as a tab)
      * @param {string[][]} options - Option groups (up to three) to show on screen
      * @param {boolean} hasHeaders - Whether option groups contain headers
      */
