@@ -1,9 +1,11 @@
 # pxt-arcade-info-screens
 
+[![Build Status](https://travis-ci.com/robo-technical-group/pxt-arcade-info-screens.svg?branch=master)](https://travis-ci.com/robo-technical-group/pxt-arcade-info-screens)
+
 Extension used to build a variety of information screens, like splash screens and screens for selecting options.
 Blocks and JavaScript interfaces available.
 
-[![Build Status](https://travis-ci.com/robo-technical-group/pxt-arcade-info-screens.svg?branch=master)](https://travis-ci.com/robo-technical-group/pxt-arcade-info-screens)
+[Link to API documentation](https://github.com/robo-technical-group/pxt-arcade-info-screens/blob/master/api.md)
 
 ## Usage
 
