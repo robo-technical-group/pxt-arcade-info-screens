@@ -108,6 +108,11 @@ interface CursorOptions {
      * Current option where cursor is located
      */
     currOption: number
+
+    /**
+     * Whether cursor is in footer
+     */
+    isInFooter: boolean
 }   // interface Cursor
 
 interface MovingSpriteOptions {
@@ -467,7 +472,7 @@ class RotatingScreens {
     public addStaticSprite(value: StaticSpriteOptions): void {
         this._staticSprites.push(value)
     }   // addStaticSprite()
-	
+
 	/**
 	 * @param {Image} img - Image to use for new static sprite.
 	 * @param {number} x - Horizontal coordinate for new sprite.
@@ -476,15 +481,15 @@ class RotatingScreens {
     //% blockId="infoScreens_RotatingScreens_addStaticSprite"
     //% block="%mySplashScreen|add image %img at location x %x y %y"
     //% img.shadow="variables_get" img.defl="myImage"
-	//% x.defl=0 y.defl=0
-	//% hidden
-	public addStaticSpriteImage(img: Image, x: number, y: number): void {
-		this._staticSprites.push({
-			img: img,
-			x: x,
-			y: y
-		})
-	}	// addStaticSpriteImage()
+    //% x.defl=0 y.defl=0
+    //% hidden
+    public addStaticSpriteImage(img: Image, x: number, y: number): void {
+        this._staticSprites.push({
+            img: img,
+            x: x,
+            y: y
+        })
+    }	// addStaticSpriteImage()
 
     /**
      * Initializes canvas and creates sprites.
@@ -890,7 +895,6 @@ class OptionScreen extends RotatingScreens {
     protected _cursor: CursorOptions
     protected _hasHeaders: boolean
     protected _isDone: boolean
-    protected _isInFooter: boolean
     protected _selectedOptions: number[]
     protected _showNext: boolean
     protected _showPrevious: boolean
@@ -918,11 +922,11 @@ class OptionScreen extends RotatingScreens {
         this._cursor = {
             color: DEFAULT_COLOR_CURSOR,
             currGroup: 0,
-            currOption: 0
+            currOption: 0,
+            isInFooter: false
         }
         this._hasHeaders = hasHeaders
         this._isDone = false
-        this._isInFooter = false
         this._showNext = false
         this._showPrevious = false
         this.buildSelectedOptions()
@@ -1070,7 +1074,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             this.moveOutOfFooter()
             this._cursor.currOption = 0
         } else {
@@ -1095,7 +1099,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             this._cursor.currGroup--
             if (this._cursor.currGroup < FooterLocation.Previous) {
                 this._cursor.currGroup = FooterLocation.Next
@@ -1124,7 +1128,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             this._cursor.currGroup++
             if (this._cursor.currGroup > FooterLocation.Next) {
                 this._cursor.currGroup = FooterLocation.Previous
@@ -1153,7 +1157,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             this.moveOutOfFooter()
             let numOptions: number = this._midText.data[this._cursor.currGroup].length
             if (this._hasHeaders) {
@@ -1182,7 +1186,7 @@ class OptionScreen extends RotatingScreens {
      * Call from a controller event handler.
      */
     public select(): void {
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             if (this._cursor.currGroup === FooterLocation.Done) {
                 this.done = true
             }   // if (this._cursorCurrGruop === FooterLocation.Done)
@@ -1243,7 +1247,7 @@ class OptionScreen extends RotatingScreens {
     protected createCursor(): void {
         if (this._midText != null && this._midText.data.length > 0) {
             this.refreshCursor()
-            if (this._isInFooter) {
+            if (this._cursor.isInFooter) {
                 this._cursor.sprite = sprites.create(this._cursor.footerImg, SpriteType.Cursor)
             } else {
                 this._cursor.sprite = sprites.create(this._cursor.img, SpriteType.Cursor)
@@ -1295,7 +1299,7 @@ class OptionScreen extends RotatingScreens {
     protected moveCursor(): void {
         let x: number
         let y: number
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             x = this._cursor.currGroup * screen.width / 3 +
                 this._cursor.sprite.image.width / 2
             y = screen.height - this._footer.font.charHeight
@@ -1315,7 +1319,7 @@ class OptionScreen extends RotatingScreens {
      * Move the cursor out of the footer and to an appropriate option.
      */
     protected moveOutOfFooter(): void {
-        this._isInFooter = false
+        this._cursor.isInFooter = false
         switch (this._midText.data.length) {
             case 1:
                 this._cursor.currGroup = 0
@@ -1339,7 +1343,7 @@ class OptionScreen extends RotatingScreens {
      * Move the cursor from an option group into the footer.
      */
     protected moveToFooter(): void {
-        this._isInFooter = true
+        this._cursor.isInFooter = true
         this._cursor.sprite.setImage(this._cursor.footerImg)
         switch (this._cursor.currGroup) {
             case 0:
@@ -1510,7 +1514,7 @@ class OptionScreenCollection extends OptionScreen {
      */
     public select() {
         super.select()
-        if (this._isInFooter) {
+        if (this._cursor.isInFooter) {
             this.saveSelections()
             if (this._cursor.currGroup === FooterLocation.Next) {
                 this._currOptScreen++
