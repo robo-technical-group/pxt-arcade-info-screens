@@ -10,3 +10,4 @@ Collection of information on the cursor. Used with option screens.
 - `color: number` Color of cursor.
 - `currGroup: number` Current option group where cursor is located.
 - `currOption: number` Current option where cursor is located.
+- `isInFooter: boolean` Whether cursor is in the footer.
