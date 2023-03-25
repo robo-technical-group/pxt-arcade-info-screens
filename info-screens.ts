@@ -147,6 +147,11 @@ interface StaticSpriteOptions {
  */
 abstract class TextSpriteFactory {
     /**
+     * Border width
+     */
+    public borderWidth: number
+
+    /**
      * Color to use when printing data
      */
     public color: number
@@ -172,7 +177,8 @@ abstract class TextSpriteFactory {
     public y: number
 
     public constructor(color: number, fontSize: number, y: number, spacing: number,
-    padding: number) {
+    padding: number, borderWidth: number) {
+        this.borderWidth = borderWidth
         this.color = color
         this.fontSize = fontSize
         this.padding = padding
@@ -192,9 +198,10 @@ class StringTextSpriteFactory extends TextSpriteFactory {
         fontSize: number,
         y: number,
         spacing: number = 1, 
-        padding: number = 0
+        padding: number = 0,
+        borderWidth: number = 0
     ) {
-        super(color, fontSize, y, spacing, padding)
+        super(color, fontSize, y, spacing, padding, borderWidth)
         this.data = data
         this._sprite = null
     }
@@ -224,8 +231,12 @@ class StringTextSpriteFactory extends TextSpriteFactory {
         }
 
         this._sprite = textsprite.create(this.data, 0, this.color)
-        this._sprite.setMaxFontHeight(this.fontSize)
         this._sprite.padding = this.padding
+        if (this.borderWidth > 0) {
+            this._sprite.borderWidth = this.borderWidth
+            this._sprite.borderColor = 0
+        }
+        this._sprite.setMaxFontHeight(this.fontSize)
         this._sprite.top = this.y
     }
 }   // class StringTextSpriteFactory
@@ -241,9 +252,10 @@ class StringArrayTextSpriteFactory extends TextSpriteFactory {
         fontSize: number,
         y: number,
         spacing: number = 1,
-        padding: number = 0
+        padding: number = 0,
+        borderWidth: number = 0
     ) {
-        super(color, fontSize, y, spacing, padding)
+        super(color, fontSize, y, spacing, padding, borderWidth)
         this.data = data
         this._sprites = []
     }
@@ -259,7 +271,7 @@ class StringArrayTextSpriteFactory extends TextSpriteFactory {
         this.CreateSprites()
         let currLeft: number = left
         for (let s of this._sprites) {
-            s.setBorder(borders ? 1 : 0, borders ? this.color : 0)
+            s.setBorder(borders ? this.borderWidth : 0, borders ? this.color : 0, this.padding)
             s.left = currLeft
             s.top = this.y
             currLeft += s.width + this.spacing
@@ -309,8 +321,12 @@ class StringArrayTextSpriteFactory extends TextSpriteFactory {
         let currY: number = this.y
         for (let text of this.data) {
             let ts: TextSprite = textsprite.create(text, 0, this.color)
-            ts.setMaxFontHeight(this.fontSize)
             ts.padding = this.padding
+            if (this.borderWidth > 0) {
+                ts.borderWidth = this.borderWidth
+                ts.borderColor = 0
+            }
+            ts.setMaxFontHeight(this.fontSize)
             ts.top = currY
             this._sprites.push(ts)
             currY += ts.height + this.spacing
@@ -329,9 +345,10 @@ class String2dArrayTextSpriteFactory extends TextSpriteFactory {
         fontSize: number,
         y: number,
         spacing: number = 1,
-        padding: number = 0
+        padding: number = 0,
+        borderWidth: number = 0
     ) {
-        super(color, fontSize, y, spacing, padding)
+        super(color, fontSize, y, spacing, padding, borderWidth)
         this.data = data
         this._sprites = []
     }
@@ -375,10 +392,11 @@ class String2dArrayTextSpriteFactory extends TextSpriteFactory {
         if (this._sprites && this._sprites[group] && this._sprites[group][item]) {
             let ts: TextSprite = this._sprites[group][item]
             if (show) {
-                ts.setBorder(1, color)
+                ts.setBorder(this.borderWidth, color, this.padding)
             } else {
-                ts.setBorder(1, 0)
+                ts.setBorder(this.borderWidth, 0, this.padding)
             }
+            ts.update()
         }
     }
 
@@ -403,8 +421,12 @@ class String2dArrayTextSpriteFactory extends TextSpriteFactory {
         this._sprites[index] = []
         for (let text of this.data[index]) {
             let ts: TextSprite = textsprite.create(text, 0, this.color)
-            ts.setMaxFontHeight(this.fontSize)
             ts.padding = this.padding
+            if (this.borderWidth > 0) {
+                ts.borderWidth = this.borderWidth
+                ts.borderColor = 0
+            }
+            ts.setMaxFontHeight(this.fontSize)
             ts.top = currY
             this._sprites[index].push(ts)
             currY += this.fontSize + 2 * this.padding + this.spacing
@@ -893,7 +915,8 @@ class RotatingScreens {
         this._midText.y = screen.height - 10
         if (this._midText.data && this._midText.data.length > 0) {
             this._midText.y = screen.height -
-                ((this._midText.fontSize + 1) * (this._midText.data[0].length + 1) + 6)
+                ((this._midText.fontSize + this._midText.padding + 1) *
+                    (this._midText.data[0].length + 1) + 4)
             switch (this._midText.data.length) {
                 case 1:
                     this._midText.DrawCenter(0)
@@ -1044,6 +1067,8 @@ class OptionScreen extends RotatingScreens {
         this._showPrevious = false
         this._midText.padding = 1
         this._midText.spacing = 0
+        this._midText.borderWidth = 1
+        this._footer.borderWidth = 1
         this.buildSelectedOptions()
     }   // constructor()
 
@@ -1518,7 +1543,7 @@ class OptionScreenCollection extends OptionScreen {
             [],
             DEFAULT_COLOR_TABS,
             DEFAULT_FONT_SIZE_TABS,
-            0, 0
+            0, 0, 1, 1
         )
     }   // constructor()
 
@@ -1586,8 +1611,9 @@ class OptionScreenCollection extends OptionScreen {
                 maxOptions = this._optionSets[index][0].length
             }   // if (this._optionSets[index][0].length > maxOptions)
         }   // for (index)
-        this._tabs.y = screen.height - (this._midText.fontSize + 1) * (maxOptions + 1) -
-            this._tabs.fontSize - 12
+        this._tabs.y = screen.height -
+            (this._midText.fontSize + this._midText.padding + 1) * (maxOptions + 1) -
+            this._tabs.fontSize - (this._tabs.padding + 1) * 2 - 6
     }   // addScreen
 
     /**
@@ -1684,28 +1710,6 @@ class OptionScreenCollection extends OptionScreen {
     protected drawTabs(): void {
         this._tabs.DrawHorizontal(1, true)
         this._tabs.Redraw(this._currOptScreen, true)
-        /*
-        if (RotatingScreens._base && this._tabs.data.length > 1) {
-            let x: number = 0
-            let tabHeight: number = this._tabs.font.charHeight + 4
-            // Draw bounding box around tabs (currently disabled).
-            // RotatingScreens._base.drawRect(0, this._tabsY, screen.width, tabHeight, this._tabsColor)
-            for (let index: number = 0; index < this._tabs.data.length; index++) {
-                let tabWidth: number = this._tabs.font.charWidth * this._tabs.data[index].length +
-                    TAB_TEXT_MARGIN * 2
-                if (index === this._currOptScreen) {
-                    this.drawTab(this._tabs.data[index], this._tabs.font,
-                        x, this._tabs.y, tabWidth, tabHeight,
-                        this._backColor, this._tabs.color, this._tabs.color)
-                } else {
-                    this.drawTab(this._tabs.data[index], this._tabs.font,
-                        x, this._tabs.y, tabWidth, tabHeight,
-                        this._tabs.color, this._backColor, this._tabs.color)
-                }   // if (index === this._currOptScreen)
-                x += tabWidth
-            }   // for (index)
-        }   // if (this._tabs.length > 1)
-        */
     }   // drawTabs()
 
     /**
