@@ -338,9 +338,9 @@ let os: OptionScreen = new OptionScreen(
     [['Human', '0 players', '1 player', '2 players', '3 players', '4 players'], ['Computer', '0 players', '1 player', '2 players', '3 players', '4 players']], Color.LightBlue,
     true
 )
-os.titles.font = image.font8
-os.headlines.font = image.font5
-os.footer.font = image.font5
+os.titles.fontSize = 8
+os.headlines.fontSize = 5
+os.footer.fontSize = 5
 os.doneText = 'Start!'
 os.setSelection(0, 2)
 os.setSelection(1, 0)
@@ -351,9 +351,9 @@ let osColl: OptionScreenCollection = new OptionScreenCollection(
     ['Salvo!'], Color.Yellow,
     [['Options', ''], ['Salvo! is (C) 2019', 'Robo Technical Group LLC'], ['Programmed in', 'MakeCode Arcade'], ['by', 'Alex K.']], Color.Brown
 )
-osColl.titles.font = image.font8
-osColl.headlines.font = image.font5
-osColl.footer.font = image.font5
+osColl.titles.fontSize = 8
+osColl.headlines.fontSize = 5
+osColl.footer.fontSize = 5
 osColl.doneText = 'Start!'
 osColl.addScreen('Players',
     [['Human', '0 players', '1 player', '2 players', '3 players', '4 players'],
@@ -377,7 +377,7 @@ game.onUpdate(function () {
     }   // if (game.runtime() >= splashes[currSplash].nextTime)
     switch (currSplash) {
         case 1:
-            for (let sprite of sprites.allOfKind(SpriteType.Moving)) {
+            for (let sprite of sprites.allOfKind(SpriteKind.Moving)) {
                 let threshold: number = sprite.width / 2
                 if (sprite.x > scene.screenWidth() + threshold) {
                     sprite.x = 0 - threshold
@@ -395,7 +395,7 @@ game.onUpdate(function () {
             break
 
         case 2:
-            if (sprites.allOfKind(SpriteType.Moving).length === 0) {
+            if (sprites.allOfKind(SpriteKind.Moving).length === 0) {
                 splashes[currSplash].showScrollingSprite()
             }   // if (sprites.allOfKind(...))
             break
@@ -480,6 +480,9 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
  * Other functions
  */
 function nextSplash(): void {
+    if (splashes && splashes[currSplash]) {
+        splashes[currSplash].release()
+    }
     currSplash++
     if (currSplash >= splashes.length) {
         currSplash = 0

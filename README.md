@@ -52,9 +52,9 @@ controller.any.onEvent(ControllerButtonEvent.Pressed, function () {
 
 ```typescript
 // Want to change the font?
-splash.titles.font = image.font8
-splash.headlines.font = image.font5
-splash.footer.font = image.font5
+splash.titles.fontSize = 16
+splash.headlines.fontSize = 8
+splash.footer.fontSize = image.5
 ```
 
 ### Sprites
@@ -223,6 +223,7 @@ osColl.setSelectionForScreen(1, 0, 0) // Second screen, first (and only) option 
 - [ ] Get your package reviewed and approved https://arcade.makecode.com/extensions/approval
 - [X] Add blocks implementation (done - version 1.0.6).
 - [X] Add RotatingScreens.release() to blocks (done - version 1.0.9).
+- [/] Refactor to use `TextSprite` extension (done - version 2.0.0; needs tweaking).
 
 Visit the following links to read more about building MakeCode custom blocks and extensions:
 

@@ -1,3 +1,9 @@
+namespace SpriteKind {
+    export const InfoScreens = SpriteKind.create()
+    export const Moving = SpriteKind.create()
+    export const Static = SpriteKind.create()
+}
+
 /**
  * Extension for creating information screens (like splash screens and options screens).
  */
@@ -42,15 +48,6 @@ enum SpriteMode {
 }   // enum SpriteMode
 
 /**
- * Sprite types used when extension creates sprites.
- */
-enum SpriteType {
-    Cursor = 77,
-    Moving = 19,
-    Static = 42
-}   // enum SpriteType
-
-/**
  * Constants
  */
 const DEFAULT_COLOR_BG: number = 15 // Black
@@ -61,17 +58,18 @@ const DEFAULT_COLOR_MID_TEXT: number = 9 // Light Blue
 const DEFAULT_COLOR_TABS: number = 3 // Pink
 const DEFAULT_COLOR_TITLE: number = 5 // Yellow
 const DEFAULT_DELAY: number = 5000
-const DEFAULT_FONT: image.Font = image.font8
-const DEFAULT_FONT_FOOTER: image.Font = image.font8
-const DEFAULT_FONT_HEADLINE: image.Font = image.font8
-const DEFAULT_FONT_MID_TEXT: image.Font = image.font5
-const DEFAULT_FONT_TABS: image.Font = image.font5
-const DEFAULT_FONT_TITLE: image.Font = image.doubledFont(image.font8)
+const DEFAULT_FONT_SIZE: number = 8
+const DEFAULT_FONT_SIZE_FOOTER: number = 8
+const DEFAULT_FONT_SIZE_HEADLINE: number = 8
+const DEFAULT_FONT_SIZE_MID_TEXT: number = 5
+const DEFAULT_FONT_SIZE_TABS: number = 5
+const DEFAULT_FONT_SIZE_TITLE: number = 16
+const DEFAULT_SPACING: number = 1
 const DEFAULT_SPRITE_SPEED: number = 100
 const DEFAULT_TEXT_DONE: string = 'Done'
 const DEFAULT_TEXT_FOOTER_SPLASH: string = 'Press any button to begin'
 const DEFAULT_Y_TITLES: number = 2
-const TAB_TEXT_MARGIN: number = 5 // Pixels to the left and right of tab text
+// const TAB_TEXT_MARGIN: number = 5 // Pixels to the left and right of tab text
 const TEXT_NEXT: string = 'Next >'
 const TEXT_PREVIOUS: string = '< Prev'
 
@@ -79,21 +77,6 @@ const TEXT_PREVIOUS: string = '< Prev'
  * Interfaces
  */
 interface CursorOptions {
-    /**
-     * Sprite for cursor
-     */
-    sprite?: Sprite
-
-    /**
-     * Main image for cursor
-     */
-    img?: Image
-
-    /**
-     * Image for cursor when in footer
-     */
-    footerImg?: Image
-
     /**
      * Color of cursor
      */
@@ -160,45 +143,277 @@ interface StaticSpriteOptions {
 }   // interface StaticSpriteOptions
 
 /**
- * Common fields for printing strings.
- * Subclasses should implement a <code>data</code> field with the data to print.
+ * Abstract class for creating text sprites with common attributes.
  */
-interface PrintOptions {
+abstract class TextSpriteFactory {
     /**
      * Color to use when printing data
      */
-    color: number
+    public color: number
 
     /**
-     * Font to use when printing data
+     * Font size to use when printing data
      */
-    font: image.Font
+    public fontSize: number
+
+    /**
+     * Number of pixels between text and border
+     */
+    public padding: number
+
+    /**
+     * Number of pixels between lines of text
+     */
+    public spacing: number
 
     /**
      * Vertical coordinate to use when printing data
      */
-    y: number
-}   // interface PrintOptions
+    public y: number
 
-interface StringPrintOptions extends PrintOptions {
-    data: string
-}   // interface StringPrintOptions
+    public constructor(color: number, fontSize: number, y: number, spacing: number,
+    padding: number) {
+        this.color = color
+        this.fontSize = fontSize
+        this.padding = padding
+        this.spacing = spacing
+        this.y = y
+    }
+}   // abstract class TextSpriteFactory
 
-interface StringArrayPrintOptions extends PrintOptions {
-    data: string[]
-}   // interface StringArrayPrintOptions
+class StringTextSpriteFactory extends TextSpriteFactory {
+    public data: string
 
-interface String2dArrayPrintOptions extends PrintOptions {
-    data: string[][]
-}   // interface String2dArrayPrintOptions
+    protected _sprite: TextSprite = null
+
+    public constructor(
+        data: string,
+        color: number,
+        fontSize: number,
+        y: number,
+        spacing: number = 1, 
+        padding: number = 0
+    ) {
+        super(color, fontSize, y, spacing, padding)
+        this.data = data
+        this._sprite = null
+    }
+
+    public get sprite(): TextSprite {
+        return this._sprite
+    }
+
+    public DrawCenter(x: number = 80): void {
+        this.CreateSprite()
+        this._sprite.x = x
+    }
+
+    public DrawLeft(left: number = 1): void {
+        this.CreateSprite()
+        this._sprite.left = left
+    }
+
+    public DrawRight(right: number = 158): void {
+        this.CreateSprite()
+        this._sprite.right = right
+    }
+
+    protected CreateSprite(): void {
+        if (this._sprite) {
+            this._sprite.destroy()
+        }
+
+        this._sprite = textsprite.create(this.data, 0, this.color)
+        this._sprite.setMaxFontHeight(this.fontSize)
+        this._sprite.padding = this.padding
+        this._sprite.top = this.y
+    }
+}   // class StringTextSpriteFactory
+
+class StringArrayTextSpriteFactory extends TextSpriteFactory {
+    public data: string[]
+
+    protected _sprites: TextSprite[]
+
+    public constructor(
+        data: string[],
+        color: number,
+        fontSize: number,
+        y: number,
+        spacing: number = 1,
+        padding: number = 0
+    ) {
+        super(color, fontSize, y, spacing, padding)
+        this.data = data
+        this._sprites = []
+    }
+
+    public DrawCenter(x: number = 80): void {
+        this.CreateSprites()
+        for (let s of this._sprites) {
+            s.x = x
+        }
+    }
+
+    public DrawHorizontal(left: number = 1, borders: boolean = false): void {
+        this.CreateSprites()
+        let currLeft: number = left
+        for (let s of this._sprites) {
+            s.setBorder(borders ? 1 : 0, borders ? this.color : 0)
+            s.left = currLeft
+            s.top = this.y
+            currLeft += s.width + this.spacing
+        }
+    }
+
+    public DrawLeft(left: number = 1): void {
+        this.CreateSprites()
+        for (let s of this._sprites) {
+            s.left = left
+        }
+    }
+
+    public DrawRight(right: number = 158): void {
+        this.CreateSprites()
+        for (let s of this._sprites) {
+            s.right = right
+        }
+    }
+
+    public Redraw(item: number, reverse: boolean = false) {
+        if (this._sprites && this._sprites[item]) {
+            let ts: TextSprite = this._sprites[item]
+            if (reverse) {
+                ts.bg = this.color
+                ts.fg = 15
+            } else {
+                ts.bg = 0
+                ts.fg = this.color
+            }
+            ts.update()
+        }
+    }
+
+    protected CreateSprites(): void {
+        if (this._sprites) {
+            if (this._sprites.length > 0) {
+                for (let s of this._sprites) {
+                    s.destroy()
+                }
+            }
+            this._sprites = []
+        } else {
+            this._sprites = []
+        }
+
+        let currY: number = this.y
+        for (let text of this.data) {
+            let ts: TextSprite = textsprite.create(text, 0, this.color)
+            ts.setMaxFontHeight(this.fontSize)
+            ts.padding = this.padding
+            ts.top = currY
+            this._sprites.push(ts)
+            currY += ts.height + this.spacing
+        }
+    }
+}   // class StringArrayTextSpriteFactory
+
+class String2dArrayTextSpriteFactory extends TextSpriteFactory {
+    public data: string[][]
+
+    protected _sprites: TextSprite[][] = []
+
+    public constructor(
+        data: string[][],
+        color: number,
+        fontSize: number,
+        y: number,
+        spacing: number = 1,
+        padding: number = 0
+    ) {
+        super(color, fontSize, y, spacing, padding)
+        this.data = data
+        this._sprites = []
+    }
+
+    public DrawCenter(index: number = 0, x: number = 80, reset: boolean = false): void {
+        this.CreateSprites(index, reset)
+        for (let s of this._sprites[index]) {
+            s.x = x
+        }
+    }
+
+    public DrawLeft(index: number = 0, left: number = 1, reset: boolean = false): void {
+        this.CreateSprites(index, reset)
+        for (let s of this._sprites[index]) {
+            s.left = left
+        }
+    }
+
+    public DrawRight(index: number = 0, right: number = 158, reset: boolean = false): void {
+        this.CreateSprites(index, reset)
+        for (let s of this._sprites[index]) {
+            s.right = right
+        }
+    }
+
+    public Redraw(group: number, item: number, reverse: boolean = false) {
+        if (this._sprites && this._sprites[group] && this._sprites[group][item]) {
+            let ts: TextSprite = this._sprites[group][item]
+            if (reverse) {
+                ts.bg = this.color
+                ts.fg = 15
+            } else {
+                ts.bg = 0
+                ts.fg = this.color
+            }
+            ts.update()
+        }
+    }
+
+    public SetBorder(group: number, item: number, color: number, show: boolean = false) {
+        if (this._sprites && this._sprites[group] && this._sprites[group][item]) {
+            let ts: TextSprite = this._sprites[group][item]
+            if (show) {
+                ts.setBorder(1, color)
+            } else {
+                ts.setBorder(1, 0)
+            }
+        }
+    }
+
+    protected CreateSprites(index: number, reset: boolean): void {
+        if (!this.data || this.data.length == 0) {
+            return
+        }
+
+        if (this._sprites) {
+            if (reset && this._sprites.length > 0) {
+                for (let group of this._sprites) {
+                    for (let s of group) {
+                        s.destroy()
+                    }
+                }
+            }
+        } else {
+            this._sprites = []
+        }
+
+        let currY: number = this.y
+        this._sprites[index] = []
+        for (let text of this.data[index]) {
+            let ts: TextSprite = textsprite.create(text, 0, this.color)
+            ts.setMaxFontHeight(this.fontSize)
+            ts.padding = this.padding
+            ts.top = currY
+            this._sprites[index].push(ts)
+            currY += this.fontSize + 2 * this.padding + this.spacing
+        }
+    }
+}   // interface String2dArrayTextSpriteFactory
 
 //% blockNamespace=infoScreens
 class RotatingScreens {
-    /**
-     * Protected static variables
-     */
-    protected static _base: Image // scene canvas that all objects update
-
     /**
      * Protected member variables
      */
@@ -206,10 +421,10 @@ class RotatingScreens {
     protected _backImage: Image  // user-supplied background image
     protected _currScreen: number // index of image currently shown
     protected _currSprite: number
-    protected _footer: StringPrintOptions
-    protected _headlines: String2dArrayPrintOptions
-    protected _midText: String2dArrayPrintOptions
-    protected _titles: StringArrayPrintOptions
+    protected _footer: StringTextSpriteFactory
+    protected _headlines: String2dArrayTextSpriteFactory
+    protected _midText: String2dArrayTextSpriteFactory
+    protected _titles: StringArrayTextSpriteFactory
     protected _movingSprites: MovingSpriteOptions
     protected _movingSpritesSequential: boolean
     protected _interval: number // interval in milliseconds for screens to rotate
@@ -243,41 +458,40 @@ class RotatingScreens {
         this._movingSpritesSequential = true
         this._staticSprites = []
 
-        this._footer = {
-            data: footer ? footer : '',
-            color: footerColor ? footerColor : DEFAULT_COLOR_FOOTER,
-            font: DEFAULT_FONT_FOOTER,
-            y: 0
-        }
-        this._headlines = {
-            data: headlines ? headlines : [],
-            color: headlinesColor ? headlinesColor : DEFAULT_COLOR_HEADLINE,
-            font: DEFAULT_FONT_HEADLINE,
-            y: 0
-        }
-        this._midText = {
-            data: midText ? midText : [],
-            color: midTextColor ? midTextColor : DEFAULT_COLOR_MID_TEXT,
-            font: DEFAULT_FONT_MID_TEXT,
-            y: 0
-        }
-        this._titles = {
-            data: titles ? titles : [],
-            color: titlesColor ? titlesColor : DEFAULT_COLOR_TITLE,
-            font: DEFAULT_FONT_TITLE,
-            y: DEFAULT_Y_TITLES
-        }
+        this._footer = new StringTextSpriteFactory(
+            footer ? footer : '',
+            footerColor ? footerColor : DEFAULT_COLOR_FOOTER,
+            DEFAULT_FONT_SIZE_FOOTER,
+            0
+        )
+        this._headlines = new String2dArrayTextSpriteFactory(
+            headlines ? headlines : [],
+            headlinesColor ? headlinesColor : DEFAULT_COLOR_HEADLINE,
+            DEFAULT_FONT_SIZE_HEADLINE,
+            0
+        )
+
+        this._midText = new String2dArrayTextSpriteFactory(
+            midText ? midText : [],
+            midTextColor ? midTextColor : DEFAULT_COLOR_MID_TEXT,
+            DEFAULT_FONT_SIZE_MID_TEXT,
+            0
+        )
+
+        this._titles = new StringArrayTextSpriteFactory(
+            titles ? titles : [],
+            titlesColor ? titlesColor : DEFAULT_COLOR_TITLE,
+            DEFAULT_FONT_SIZE_TITLE,
+            DEFAULT_Y_TITLES,
+        )
+
         this._movingSprites = {
             imgs: [],
             dir: SpriteDirection.Both,
             mode: SpriteMode.Random,
             speed: DEFAULT_SPRITE_SPEED,
-            y: 0
+            y: 0,
         }
-
-        if (!RotatingScreens._base) {
-            RotatingScreens._base = image.create(screen.width, screen.height)
-        }   // if (! RotatingScreens._base)
     }   // constructor()
 
     /**
@@ -306,20 +520,6 @@ class RotatingScreens {
     }   // set backImage()
 
     /**
-     * @return {Image} Common canvas
-     */
-    public static get canvas(): Image {
-        return RotatingScreens._base
-    }   // get canvas()
-
-    /**
-     * @param (Image) value - Image to use for common canvas
-     */
-    public static set canvas(value: Image) {
-        RotatingScreens._base = value
-    }   // set canvas()
-
-    /**
      * @return {number} Interval in milliseconds when screens will rotate
      */
     //% blockId="infoScreens_RotatingScreens_delay_get"
@@ -346,17 +546,17 @@ class RotatingScreens {
     }   // set delay()
 
     //% callInDebugger
-    public get footer(): StringPrintOptions {
+    public get footer(): StringTextSpriteFactory {
         return this._footer;
     }   // get footer()
 
     //% callInDebugger
-    public get headlines(): String2dArrayPrintOptions {
+    public get headlines(): String2dArrayTextSpriteFactory {
         return this._headlines;
     }   // get headlines()
 
     //% callInDebugger
-    public get midText(): String2dArrayPrintOptions {
+    public get midText(): String2dArrayTextSpriteFactory {
         return this._midText;
     }   // get midText()
 
@@ -368,7 +568,7 @@ class RotatingScreens {
     //% blockCombine
     //% hidden
     public get movingSpriteCount(): number {
-        return sprites.allOfKind(SpriteType.Moving).length
+        return sprites.allOfKind(SpriteKind.Moving).length
     }   // get movingSpriteCount()
 
     //% callInDebugger
@@ -430,7 +630,7 @@ class RotatingScreens {
     }   // set sequentialSprites()
 
     //% callInDebugger
-    public get titles(): StringArrayPrintOptions {
+    public get titles(): StringArrayTextSpriteFactory {
         return this._titles;
     }   // get titles()
 
@@ -498,7 +698,6 @@ class RotatingScreens {
     //% blockId="infoScreens_RotatingScreens_build"
     //% block="%mySplashScreen|show"
     public build(): void {
-        this.destroySprites()
         this.rebuild()
         this.refresh()
         if (this._staticSprites.length > 0) {
@@ -534,12 +733,18 @@ class RotatingScreens {
     //% blockId="infoScreens_RotatingScreens_destroySprites"
     //% block="%mySplashScreen|destroy sprites"
     public destroySprites(): void {
-        for (let sprite of sprites.allOfKind(SpriteType.Moving)) {
+        for (let sprite of sprites.allOfKind(SpriteKind.InfoScreens)) {
+            sprite.destroy()
+        }
+        for (let sprite of sprites.allOfKind(SpriteKind.Moving)) {
             sprite.destroy()
         }   // for (sprite)
-        for (let sprite of sprites.allOfKind(SpriteType.Static)) {
+        for (let sprite of sprites.allOfKind(SpriteKind.Static)) {
             sprite.destroy()
         }   // for (sprite)
+        for (let sprite of sprites.allOfKind(SpriteKind.Text)) {
+            sprite.destroy()
+        }
     }   // destroySprites()
 
     /**
@@ -551,16 +756,6 @@ class RotatingScreens {
     }   // rebuild()
 
     /**
-     * Release the canvas so that it can be garbage-collected.
-     */
-    //% blockId="infoScreens_RotatingScreens_release"
-    //% block="%mySplashScreen|destroy resources"
-    public release(): void {
-        RotatingScreens._base = null
-        this.destroySprites()
-    }   // release()
-
-    /**
      * Update canvas with the current headline.
      * Set time for next update.
      */
@@ -568,9 +763,18 @@ class RotatingScreens {
         if (!this._currScreen || this._currScreen < 0 || this._currScreen >= this._headlines.data.length) {
             this._currScreen = 0
         }   // if (this._currScreen >= this._headlines.length)
-        this.drawCurrHeadline()
+        this.headlines.DrawCenter(this._currScreen, 80, true)
         this._next = game.runtime() + this._interval
     }   // refresh()
+
+    /**
+     * Destroy all sprites associated with the information screens.
+     */
+    //% blockId="infoScreens_RotatingScreens_release"
+    //% block="%mySplashScreen|destroy resources"
+    public release(): void {
+        this.destroySprites()
+    }   // release()
 
     /**
      * Update canvas with the next headline.
@@ -609,7 +813,7 @@ class RotatingScreens {
             this._currSprite = Math.randomRange(0, this._movingSprites.imgs.length - 1)
         }   // if (this._movingSpritesSequential)
         let newSprite: Sprite = sprites.create(this._movingSprites.imgs[this._currSprite].clone(),
-            SpriteType.Moving)
+            SpriteKind.Moving)
         newSprite.setFlag(SpriteFlag.Ghost, true)
         newSprite.setFlag(SpriteFlag.AutoDestroy, true)
         newSprite.y = this._movingSprites.y
@@ -641,7 +845,7 @@ class RotatingScreens {
      */
     protected addAllMovingSprites(keepOnScreen: boolean = true): void {
         for (let img of this._movingSprites.imgs) {
-            let newSprite: Sprite = sprites.create(img.clone(), SpriteType.Moving)
+            let newSprite: Sprite = sprites.create(img.clone(), SpriteKind.Moving)
             newSprite.setFlag(SpriteFlag.BounceOnWall, keepOnScreen)
             newSprite.setFlag(SpriteFlag.Ghost, true)
             newSprite.x = Math.randomRange(0, screen.width)
@@ -662,7 +866,7 @@ class RotatingScreens {
      */
     protected addStaticSprites(): void {
         for (let sprite of this._staticSprites) {
-            let newSprite: Sprite = sprites.create(sprite.img.clone(), SpriteType.Static)
+            let newSprite: Sprite = sprites.create(sprite.img.clone(), SpriteKind.Static)
             newSprite.setFlag(SpriteFlag.Ghost, true)
             newSprite.x = sprite.x
             newSprite.y = sprite.y
@@ -673,54 +877,44 @@ class RotatingScreens {
      * Draws text and background image on canvas.
      */
     protected createBase(): void {
-        // Check RotatingScreens._base in case release() has been called.
-        if (!RotatingScreens._base) {
-            RotatingScreens._base = image.create(screen.width, screen.height)
-        }   // if (! RotatingScreens._base)
-
-        RotatingScreens._base.fill(this._backColor)
-        this.duplicateBackImage()
-        this.printMultipleCenter(this._titles.data, RotatingScreens._base, DEFAULT_Y_TITLES,
-            this._titles.color, this._titles.font)
-        this._footer.y = screen.height - (this._footer.font.charHeight + 2)
-        RotatingScreens._base.printCenter(this._footer.data, this._footer.y,
-            this._footer.color, this._footer.font)
+        this.destroySprites()
+        scene.setBackgroundColor(this._backColor)
+        if (this._backImage) {
+            scene.setBackgroundImage(this._backImage)
+        } else {
+            scene.setBackgroundImage(null)
+        }
+        this._titles.DrawCenter()
+        this._footer.y = screen.height - (this._footer.fontSize + 2 * this._footer.padding + 2)
+        this._footer.DrawCenter()
 
         // Set initial vertical coordinate for mid-text.
         // Will be adjusted if mid-text exists.
         this._midText.y = screen.height - 10
         if (this._midText.data && this._midText.data.length > 0) {
             this._midText.y = screen.height -
-                ((this._midText.font.charHeight + 1) * (this._midText.data[0].length + 1) + 6)
+                ((this._midText.fontSize + 1) * (this._midText.data[0].length + 1) + 6)
             switch (this._midText.data.length) {
                 case 1:
-                    this.printMultipleCenter(this._midText.data[0],
-                        RotatingScreens._base, this._midText.y, this._midText.color, this._midText.font)
+                    this._midText.DrawCenter(0)
                     break;
 
                 case 2:
-                    this.printMultiple(this._midText.data[0],
-                        RotatingScreens._base, 1, this._midText.y, this._midText.color, this._midText.font)
-                    this.printMultiple(this._midText.data[1],
-                        RotatingScreens._base, screen.width / 2 + 1, this._midText.y, this._midText.color,
-                        this._midText.font)
+                    this._midText.DrawLeft(0)
+                    this._midText.DrawLeft(1, screen.width / 2 + 1)
                     break;
 
                 default:
-                    this.printMultiple(this._midText.data[0],
-                        RotatingScreens._base, 1, this._midText.y, this._midText.color, this._midText.font)
-                    this.printMultipleCenter(this._midText.data[1],
-                        RotatingScreens._base, this._midText.y, this._midText.color, this._midText.font)
-                    this.printMultiple(this._midText.data[2],
-                        RotatingScreens._base, screen.width * 2 / 3 + 1, this._midText.y, this._midText.color,
-                        this._midText.font)
+                    this._midText.DrawLeft(0)
+                    this._midText.DrawCenter(1)
+                    this._midText.DrawLeft(2, screen.width * 2 / 3 + 1)
                     break;
             }   // switch (this._midText.length)
         }   // if (this._midText)
 
         // Calculate vertical coordinate for headlines.
         if (this._backImage) {
-            let minY = this._midText.y - (this._headlines.font.charHeight + 1) * 2
+            let minY = this._midText.y - (this._headlines.fontSize + 1) * 2
             if (this._backImage.height > minY) {
                 this._headlines.y = minY
             } else {
@@ -728,7 +922,7 @@ class RotatingScreens {
             }   // if (this._backImage.height > minY)
         } else {
             if (this._titles.data) {
-                this._headlines.y = this._titles.font.charHeight * this._titles.data.length + this._titles.data.length +
+                this._headlines.y = this._titles.fontSize * this._titles.data.length + this._titles.data.length +
                     DEFAULT_Y_TITLES + 2
             } else {
                 this._headlines.y = DEFAULT_Y_TITLES + 2
@@ -736,91 +930,8 @@ class RotatingScreens {
         }   // if (this._backImage)
 
         // Calculate vertical coordinate for moving sprites.
-        this._movingSprites.y = (this._headlines.y + this._headlines.font.charHeight * 2 + 1 + this._midText.y) / 2
-        scene.setBackgroundImage(RotatingScreens._base)
+        this._movingSprites.y = (this._headlines.y + this._headlines.fontSize * 2 + 1 + this._midText.y) / 2
     }   // createBase()
-
-    /**
-     * Duplicates the background image to the canvas
-     */
-    protected duplicateBackImage(): void {
-        if (this._backImage != null && RotatingScreens._base != null) {
-            for (let x: number = 0; x < this._backImage.width; x++) {
-                for (let y: number = 0; y < this._backImage.height; y++) {
-                    RotatingScreens._base.setPixel(x, y, this._backImage.getPixel(x, y))
-                }   // for (y)
-            }   // for (x)
-        }   // if (!RotatingScreens._base)
-    }   // duplicateBackImage()
-
-    /**
-     * Draw the current headline on the canvas.
-     */
-    protected drawCurrHeadline(): void {
-        if (!RotatingScreens._base) {
-            return
-        }   // if (!RotatingScreens._base)
-        if (this._headlines.data) {
-            let lines: string[] = this._headlines.data[this._currScreen]
-            if (lines) {
-                // Clear out current headline
-                RotatingScreens._base.fillRect(0, this._headlines.y, screen.width,
-                    lines.length * (this._headlines.font.charHeight + 1),
-                    this._backColor)
-                this.printMultipleCenter(lines, RotatingScreens._base,
-                    this._headlines.y, this._headlines.color, this._headlines.font)
-            }   // if (line)
-        }
-    }   // drawCurrHeadline()
-
-    /**
-     * Draw multiple strings on an image, starting at a given coordinate.
-     * @param {string[]} text - Strings to print on the image
-     * @param {Image} img - Image where strings will be drawn
-     * @param {number} x - Horizontal coordinate for text; lines will be left-justified
-     * @param {number} y - Vertical coordinate where first line will print
-     * @param {number} color - Color to use when printing strings
-     * @param {image.Font} font - Font to use when printing strings
-     * @param {number} spacing - Number of pixels to place between strings
-     */
-    protected printMultiple(text: string[], img: Image,
-        x: number, y: number, color: number, font: image.Font = null,
-        spacing: number = 1): void {
-        if (!font) {
-            font = DEFAULT_FONT
-        }   // if (!font)
-
-        let currY: number = y
-        for (let t of text) {
-            img.print(t, x, currY, color, font)
-            currY += (font.charHeight + spacing)
-        }   // for ( t )
-    }   // printMultiple()
-
-    /**
-     * Draw multiple strings centered on an image, starting at a given vertical coordinate.
-     * @param {string[]} text - Strings to print on the image
-     * @param {Image} img - Image where strings will be drawn
-     * @param {number} y - Vertical coordinate where first line will print
-     * @param {number} color - Color to use when printing strings
-     * @param {image.Font} font - Font to use when printing strings
-     * @param {number} spacing - Number of pixels to place between strings
-     */
-    protected printMultipleCenter(text: string[], img: Image,
-        y: number, color: number, font: image.Font = null,
-        spacing: number = 1): void {
-        if (!font) {
-            font = DEFAULT_FONT
-        }   // if (!font)
-
-        if (text) {
-            let currY: number = y;
-            for (let t of text) {
-                img.printCenter(t, currY, color, font);
-                currY += (font.charHeight + spacing);
-            }   // for ( t )
-        }   // if (text)
-    }   // printMultipleCenter()
 }   // class RotatingScreens
 
 //% blockNamespace=infoScreens
@@ -895,6 +1006,8 @@ class OptionScreen extends RotatingScreens {
     protected _cursor: CursorOptions
     protected _hasHeaders: boolean
     protected _isDone: boolean
+    protected _nextSprite: TextSprite
+    protected _prevSprite: TextSprite
     protected _selectedOptions: number[]
     protected _showNext: boolean
     protected _showPrevious: boolean
@@ -929,6 +1042,8 @@ class OptionScreen extends RotatingScreens {
         this._isDone = false
         this._showNext = false
         this._showPrevious = false
+        this._midText.padding = 1
+        this._midText.spacing = 0
         this.buildSelectedOptions()
     }   // constructor()
 
@@ -948,9 +1063,7 @@ class OptionScreen extends RotatingScreens {
 
     public set done(value: boolean) {
         this._isDone = value
-        if (value) {
-            this.destroyCursor()
-        } else {
+        if (!value) {
             this.createCursor()
         }   // if (value)
     }   // set done()
@@ -1038,19 +1151,10 @@ class OptionScreen extends RotatingScreens {
      */
     public build(): void {
         super.build()
+        this.refreshSelections()
         this.createCursor()
         this._isDone = false
     }   // build()
-
-    /**
-     * @see RotatingScreens#destroySprites
-     */
-    public destroySprites(): void {
-        super.destroySprites()
-        for (let sprite of sprites.allOfKind(SpriteType.Cursor)) {
-            sprite.destroy()
-        }   // for (sprite)
-    }   // destroySprites()
 
     /**
      * Gets the selected option for an option group.
@@ -1074,6 +1178,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
+        this.updateCursor(false)
         if (this._cursor.isInFooter) {
             this.moveOutOfFooter()
             this._cursor.currOption = 0
@@ -1087,7 +1192,7 @@ class OptionScreen extends RotatingScreens {
                 this.moveToFooter()
             }   // if (this._cursor.currOption >= numOptions)
         }   // if (this._isInFooter)
-        this.moveCursor()
+        this.updateCursor(true)
     }   // moveCursorDown()
 
     /**
@@ -1099,6 +1204,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
+        this.updateCursor(false)
         if (this._cursor.isInFooter) {
             this._cursor.currGroup--
             if (this._cursor.currGroup < FooterLocation.Previous) {
@@ -1116,7 +1222,7 @@ class OptionScreen extends RotatingScreens {
                 this._cursor.currGroup = this._midText.data.length - 1
             }   // if (this._cursor.currGroup < 0)
         }   // if (this._isInFooter)
-        this.moveCursor()
+        this.updateCursor(true)
     }   // moveCursorLeft()
 
     /**
@@ -1128,6 +1234,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
+        this.updateCursor(false)
         if (this._cursor.isInFooter) {
             this._cursor.currGroup++
             if (this._cursor.currGroup > FooterLocation.Next) {
@@ -1145,7 +1252,7 @@ class OptionScreen extends RotatingScreens {
                 this._cursor.currGroup = 0
             }   // if (this._cursor.currGroup >= this._midText.length)
         }   // if (this._isInFooter)
-        this.moveCursor()
+        this.updateCursor(true)
     }   // moveCursorRight()
 
     /**
@@ -1157,6 +1264,7 @@ class OptionScreen extends RotatingScreens {
         if (this._isDone) {
             return
         }   // if (this._isDone)
+        this.updateCursor(false)
         if (this._cursor.isInFooter) {
             this.moveOutOfFooter()
             let numOptions: number = this._midText.data[this._cursor.currGroup].length
@@ -1170,7 +1278,7 @@ class OptionScreen extends RotatingScreens {
                 this.moveToFooter()
             }   // if (this._cursor.currOption < 0)
         }   // if (this.isInFooter)
-        this.moveCursor()
+        this.updateCursor(true)
     }   // moveCursorUp()
 
     /**
@@ -1178,7 +1286,8 @@ class OptionScreen extends RotatingScreens {
      */
     public refresh() {
         super.refresh()
-        this.refreshCursor()
+        this.refreshSelections()
+        this.updateCursor(true)
     }   // refresh()
 
     /**
@@ -1192,7 +1301,6 @@ class OptionScreen extends RotatingScreens {
             }   // if (this._cursorCurrGruop === FooterLocation.Done)
         } else {
             this._selectedOptions[this._cursor.currGroup] = this._cursor.currOption
-            this.rebuild()
             this.refresh()
         }   // if (this._isInFooter)
     }   // select()
@@ -1204,6 +1312,7 @@ class OptionScreen extends RotatingScreens {
      */
     public setSelection(index: number = 0, value: number = -1): void {
         this._selectedOptions[index] = value
+        this.refresh()
     }   // setSelection()
 
     /**
@@ -1233,11 +1342,18 @@ class OptionScreen extends RotatingScreens {
             }   // for (index)
         }   // if (this._midText)
         if (this._showNext) {
-            let x: number = screen.width - TEXT_NEXT.length * this._footer.font.charWidth
-            RotatingScreens._base.print(TEXT_NEXT, x, this._footer.y, this._footer.color, this._footer.font)
+            this._nextSprite = textsprite.create(TEXT_NEXT, 0, this._footer.color)
+            this._nextSprite.setMaxFontHeight(this._footer.fontSize)
+            this._nextSprite.right = 158
+            this._nextSprite.top = this._footer.y
+            this._nextSprite.setBorder(1, 0)
         }   // if (this._showNext)
         if (this._showPrevious) {
-            RotatingScreens._base.print(TEXT_PREVIOUS, 1, this._footer.y, this._footer.color, this._footer.font)
+            this._prevSprite = textsprite.create(TEXT_PREVIOUS, 0, this._footer.color)
+            this._prevSprite.setMaxFontHeight(this._footer.fontSize)
+            this._prevSprite.left = 1
+            this._prevSprite.top = this._footer.y
+            this._prevSprite.setBorder(1, 0)
         }   // if (this._showPrevious)
     }   // createBase()
 
@@ -1245,28 +1361,8 @@ class OptionScreen extends RotatingScreens {
      * Initializes the cursor images and adds the cursor sprite to the screen.
      */
     protected createCursor(): void {
-        if (this._midText != null && this._midText.data.length > 0) {
-            this.refreshCursor()
-            if (this._cursor.isInFooter) {
-                this._cursor.sprite = sprites.create(this._cursor.footerImg, SpriteType.Cursor)
-            } else {
-                this._cursor.sprite = sprites.create(this._cursor.img, SpriteType.Cursor)
-            }   // if (this._isInFooter)
-            this.moveCursor()
-        }   // if (this._midText)
-        this._cursor.footerImg = image.create(Math.floor(screen.width / 3),
-            this._midText.font.charHeight + 2)
-        this._cursor.footerImg.drawRect(0, 0,
-            this._cursor.footerImg.width, this._cursor.footerImg.height,
-            this._cursor.color)
+        this.updateCursor()
     }   // createCursor()
-
-    /**
-     * Destroys the cursor sprite.
-     */
-    protected destroyCursor(): void {
-        this._cursor.sprite.destroy()
-    }   // destroyCursor()
 
     /**
      * Draws the given option as selected (i.e. in reverse)
@@ -1274,46 +1370,8 @@ class OptionScreen extends RotatingScreens {
      * @param {number} option - Option to draw as selected
      */
     protected drawSelection(group: number, option: number) {
-        if (!RotatingScreens._base) {
-            return
-        }   // if (!RotatingScreens._base)
-        let x: number = group * screen.width / this._midText.data.length
-        let y: number = this._midText.y +
-            (option + (this._hasHeaders ? 1 : 0)) *
-            (this._midText.font.charHeight + 1)
-        let w: number = screen.width / this._midText.data.length
-        let h: number = this._midText.font.charHeight
-        RotatingScreens._base.fillRect(x, y, w, h, this._midText.color)
-        let text: string = this._midText.data[group][option +
-            (this._hasHeaders ? 1 : 0)]
-        if (this._midText.data.length === 1) {
-            RotatingScreens._base.printCenter(text, y, this._backColor, this._midText.font)
-        } else {
-            RotatingScreens._base.print(text, x + 1, y, this._backColor, this._midText.font)
-        }   // if (this._midText.length === 0)
+        this._midText.Redraw(group, option, true)
     }   // drawSelection()
-
-    /**
-     * Moves the cursor sprite to the location indicated in its CursorOptions.
-     */
-    protected moveCursor(): void {
-        let x: number
-        let y: number
-        if (this._cursor.isInFooter) {
-            x = this._cursor.currGroup * screen.width / 3 +
-                this._cursor.sprite.image.width / 2
-            y = screen.height - this._footer.font.charHeight
-        } else {
-            x = this._cursor.currGroup * screen.width / this._midText.data.length +
-                this._cursor.sprite.image.width / 2
-            y = this._midText.y - 2 +
-                (this._cursor.currOption + (this._hasHeaders ? 1 : 0)) *
-                (this._midText.font.charHeight + 1) +
-                this._cursor.sprite.image.height / 2
-        }   // if (this._isInFooter)
-        this._cursor.sprite.x = x
-        this._cursor.sprite.y = y
-    }   // moveCursor()
 
     /**
      * Move the cursor out of the footer and to an appropriate option.
@@ -1336,7 +1394,6 @@ class OptionScreen extends RotatingScreens {
             default:
             // No change to this._cursor.currGroup
         }   // switch (this._midText.length)
-        this._cursor.sprite.setImage(this._cursor.img)
     }   // moveOutOfFooter()
 
     /**
@@ -1344,7 +1401,6 @@ class OptionScreen extends RotatingScreens {
      */
     protected moveToFooter(): void {
         this._cursor.isInFooter = true
-        this._cursor.sprite.setImage(this._cursor.footerImg)
         switch (this._cursor.currGroup) {
             case 0:
                 if (this._showPrevious) {
@@ -1368,8 +1424,22 @@ class OptionScreen extends RotatingScreens {
     }   // moveToFooter()
 
     /**
-     * Rebuild the cursor images.
+     * Refreshes the list of options and highlights selections.
      */
+    protected refreshSelections(): void {
+        if (this._selectedOptions) {
+            for (let group: number = 0; group < this._midText.data.length; group++) {
+                for (let option: number = 0; option < this._midText.data[group].length; option++) {
+                    this._midText.Redraw(group, option,
+                        option == this._selectedOptions[group] + (this._hasHeaders ? 1 : 0)
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Rebuild the cursor images.
     protected refreshCursor() {
         if (!this._midText.data || !this._midText.data.length) return
         this._cursor.img = image.create(Math.floor(screen.width / this._midText.data.length),
@@ -1378,6 +1448,41 @@ class OptionScreen extends RotatingScreens {
             this._cursor.img.width, this._cursor.img.height,
             this._cursor.color)
     }   // refreshCursor()
+     */
+
+    /**
+     * Shows or clears the highlight on the item indicated in CursorOptions.
+     */
+    protected updateCursor(show: boolean = true): void {
+        if (this._cursor.isInFooter) {
+            let ts: TextSprite
+            switch (this._cursor.currGroup) {
+                case FooterLocation.Done:
+                    ts = this._footer.sprite
+                    break
+
+                case FooterLocation.Next:
+                    ts = this._nextSprite
+                    break
+
+                case FooterLocation.Previous:
+                    ts = this._prevSprite
+                    break
+            }
+            
+            if (ts) {
+                if (show) {
+                    ts.setBorder(1, this._cursor.color)
+                } else {
+                    ts.setBorder(1, 0)
+                }
+            }
+        } else {
+            this._midText.SetBorder(this._cursor.currGroup,
+                this._cursor.currOption + (this._hasHeaders ? 1 : 0),
+                this._cursor.color, show)
+        }
+    }   // updateCursor()
 }   // class OptionScreen
 
 //% blockNamespace=infoScreens
@@ -1389,7 +1494,7 @@ class OptionScreenCollection extends OptionScreen {
     protected _optionSetHasHeaders: boolean[]
     protected _optionSets: string[][][]
     protected _selectedOptionsColl: number[][]
-    protected _tabs: StringArrayPrintOptions
+    protected _tabs: StringArrayTextSpriteFactory
 
     /**
      * Constructor
@@ -1409,12 +1514,12 @@ class OptionScreenCollection extends OptionScreen {
         this._optionSetHasHeaders = []
         this._optionSets = []
         this._selectedOptionsColl = []
-        this._tabs = {
-            data: [],
-            color: DEFAULT_COLOR_TABS,
-            font: DEFAULT_FONT_TABS,
-            y: 0
-        }
+        this._tabs = new StringArrayTextSpriteFactory(
+            [],
+            DEFAULT_COLOR_TABS,
+            DEFAULT_FONT_SIZE_TABS,
+            0, 0
+        )
     }   // constructor()
 
     /**
@@ -1451,7 +1556,7 @@ class OptionScreenCollection extends OptionScreen {
         return this._selectedOptionsColl
     }   // get selectionsAllScreens()
 
-    public get tabs(): StringArrayPrintOptions {
+    public get tabs(): StringArrayTextSpriteFactory {
         return this._tabs
     }   // get tabs()
 
@@ -1481,8 +1586,8 @@ class OptionScreenCollection extends OptionScreen {
                 maxOptions = this._optionSets[index][0].length
             }   // if (this._optionSets[index][0].length > maxOptions)
         }   // for (index)
-        this._tabs.y = screen.height - (this._midText.font.charHeight + 1) * (maxOptions + 1) -
-            this._tabs.font.charHeight - 12
+        this._tabs.y = screen.height - (this._midText.fontSize + 1) * (maxOptions + 1) -
+            this._tabs.fontSize - 12
     }   // addScreen
 
     /**
@@ -1574,33 +1679,12 @@ class OptionScreenCollection extends OptionScreen {
     }   // createBase()
 
     /**
-     * Draws a tab on the screen.
-     * @param {string} text - Text to display in tab
-     * @param {image.Font} font - Font to use when printing text
-     * @param {number} x - Horizontal coordinate for tab
-     * @param {number} y - Vertical coordinate for tab
-     * @param {number} width - Width of tab
-     * @param {number} height - Height of tab
-     * @param {number} textColor - Color to use when printing text
-     * @param {number} backColor - Color for background of tab
-     * @param {number} borderColor - Color for border of tab
-     */
-    protected drawTab(text: string, font: image.Font,
-        x: number, y: number, width: number, height: number,
-        textColor: number, backColor: number, borderColor: number): void {
-        if (!RotatingScreens._base) {
-            return
-        }   // if (!RotatingScreens._base)
-        RotatingScreens._base.fillRect(x, y, width, height, backColor)
-        RotatingScreens._base.drawRect(x, y, width, height, borderColor)
-        let textMargin = (width - font.charWidth * text.length) / 2
-        RotatingScreens._base.print(text, x + textMargin, y + 2, textColor, font)
-    }   // drawTab()
-
-    /**
      * Draws the tabs on the screen.
      */
     protected drawTabs(): void {
+        this._tabs.DrawHorizontal(1, true)
+        this._tabs.Redraw(this._currOptScreen, true)
+        /*
         if (RotatingScreens._base && this._tabs.data.length > 1) {
             let x: number = 0
             let tabHeight: number = this._tabs.font.charHeight + 4
@@ -1621,6 +1705,7 @@ class OptionScreenCollection extends OptionScreen {
                 x += tabWidth
             }   // for (index)
         }   // if (this._tabs.length > 1)
+        */
     }   // drawTabs()
 
     /**
@@ -1658,17 +1743,4 @@ namespace infoScreens {
     export function createSplashScreen(): SplashScreens {
         return new SplashScreens(null)
     }   // createSplashScreen()
-
-    /**
-     * Set the common canvas used by all splash screen objects.
-     * Use if your game also uses a common canvas to conserve memory.
-     * @param {Image} img - Canvas that all splash screen objects will use.
-     */
-    //% blockId="infoScreens_setImage"
-    //% block="set splash screen canvas to %img"
-    //% img.defl="myImage" img.shadow="variables_get"
-    //% hidden
-    export function setCanvas(img: Image): void {
-        RotatingScreens.canvas = img
-    }   // setCanvas()
 }   // namespace infoScreens
