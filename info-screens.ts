@@ -1747,4 +1747,11 @@ namespace infoScreens {
     export function createSplashScreen(): SplashScreens {
         return new SplashScreens(null)
     }   // createSplashScreen()
+
+    //% block="Add system menu option $name icon $image function:"
+    //% handlerStatement=1
+    //% image.shadow=screen_image_picker
+    export function addMenuOption(name: string, image: Image, handler: () => void): void {
+        scene.systemMenu.addEntry(() => name, handler, image);
+    }
 }   // namespace infoScreens
