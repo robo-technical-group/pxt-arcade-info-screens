@@ -7,6 +7,8 @@ Blocks and JavaScript interfaces available.
 
 [Link to API documentation](https://github.com/robo-technical-group/pxt-arcade-info-screens/blob/master/api.md)
 
+Incorporates system menu extension described in the [MakeCode Forums](https://forum.makecode.com/t/custom-menu-showcase/18381)
+
 ## Usage
 
 ### Splash Screens
